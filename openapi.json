@@ -1086,7 +1086,7 @@
             "required": false,
             "in": "query",
             "schema": {
-              "default": "createdAt",
+              "default": "receptionDate",
               "type": "string"
             }
           },

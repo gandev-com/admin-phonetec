@@ -3,49 +3,18 @@
 import { useEffect, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import Link from "next/link";
+import { Plus } from "lucide-react";
 
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { StatusBadge, STATUS_LABELS } from "@/components/reports/status-badge";
 import { reportsApi } from "@/lib/api/reports";
-import type { PaymentStatus, ReportStatus } from "@/types/report";
+import type { PaymentStatus, Report, ReportStatus } from "@/types/report";
 
 const PAGE_SIZE = 20;
-
-const STATUS_LABELS: Record<ReportStatus, string> = {
-  RECEIVED: "Recibido",
-  IN_DIAGNOSIS: "Diagnóstico",
-  BUDGET_SENT: "Presupuesto enviado",
-  BUDGET_ACCEPTED: "Pres. aceptado",
-  BUDGET_REJECTED: "Pres. rechazado",
-  WAITING_PARTS: "Esp. repuesto",
-  IN_REPAIR: "En reparación",
-  REPAIRED: "Reparado",
-  TESTING: "En pruebas",
-  READY_FOR_PICKUP: "Listo para recoger",
-  DELIVERED: "Entregado",
-  CANCELLED: "Cancelado",
-  IRREPARABLE: "No reparable",
-};
-
-const STATUS_VARIANT: Record<ReportStatus, "default" | "secondary" | "destructive" | "outline"> = {
-  RECEIVED: "outline",
-  IN_DIAGNOSIS: "secondary",
-  BUDGET_SENT: "secondary",
-  BUDGET_ACCEPTED: "default",
-  BUDGET_REJECTED: "destructive",
-  WAITING_PARTS: "secondary",
-  IN_REPAIR: "default",
-  REPAIRED: "default",
-  TESTING: "secondary",
-  READY_FOR_PICKUP: "outline",
-  DELIVERED: "outline",
-  CANCELLED: "destructive",
-  IRREPARABLE: "destructive",
-};
 
 const PAYMENT_LABELS: Record<PaymentStatus, string> = {
   PENDING: "Pendiente",
@@ -62,6 +31,37 @@ const REPORT_TYPE_LABELS: Record<string, string> = {
 };
 
 const ALL_STATUSES = Object.keys(STATUS_LABELS) as ReportStatus[];
+
+// Statuses that are still open/active (device not yet delivered/closed)
+const ACTIVE_STATUSES = new Set<ReportStatus>([
+  "RECEIVED",
+  "IN_DIAGNOSIS",
+  "BUDGET_SENT",
+  "BUDGET_ACCEPTED",
+  "BUDGET_REJECTED",
+  "WAITING_PARTS",
+  "IN_REPAIR",
+  "TESTING",
+  "REPAIRED",
+  "READY_FOR_PICKUP",
+]);
+
+function sortReportsByPriority(reports: Report[]) {
+  return [...reports].sort((a, b) => {
+    const aActive = ACTIVE_STATUSES.has(a.currentStatus);
+    const bActive = ACTIVE_STATUSES.has(b.currentStatus);
+    if (aActive && !bActive) return -1;
+    if (!aActive && bActive) return 1;
+    if (aActive && bActive) {
+      // Oldest reception first — they've been waiting longest
+      const aDate = a.receptionDate ?? a.createdAt;
+      const bDate = b.receptionDate ?? b.createdAt;
+      return new Date(aDate).getTime() - new Date(bDate).getTime();
+    }
+    // Both completed — most recently updated first
+    return new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime();
+  });
+}
 
 export function ReportsTable() {
   const [searchInput, setSearchInput] = useState("");
@@ -85,10 +85,13 @@ export function ReportsTable() {
         currentStatus: statusFilter || undefined,
         page,
         limit: PAGE_SIZE,
+        sortBy: "updatedAt",
+        order: "desc",
       }),
   });
 
-  const reports = reportsQuery.data?.data ?? [];
+  const rawReports = reportsQuery.data?.data ?? [];
+  const reports = sortReportsByPriority(rawReports);
   const total = reportsQuery.data?.total ?? 0;
   const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE));
 
@@ -113,6 +116,13 @@ export function ReportsTable() {
             placeholder="Buscar por nº orden, cliente..."
             className="sm:max-w-xs"
           />
+          <Link
+            href="/reports/nuevo"
+            className="inline-flex h-8 items-center gap-1.5 rounded-lg bg-primary px-2.5 text-sm font-medium text-primary-foreground hover:bg-primary/80"
+          >
+            <Plus className="h-4 w-4" />
+            Nueva orden
+          </Link>
         </div>
       </CardHeader>
 
@@ -142,7 +152,7 @@ export function ReportsTable() {
             <div className="overflow-hidden rounded-xl border">
               <Table>
                 <TableHeader>
-                  <TableRow>
+                  <TableRow className="bg-slate-50/50">
                     <TableHead>Nº Orden</TableHead>
                     <TableHead>Cliente</TableHead>
                     <TableHead>Dispositivo</TableHead>
@@ -174,9 +184,7 @@ export function ReportsTable() {
                       </TableCell>
                       <TableCell className="text-xs">{REPORT_TYPE_LABELS[report.reportType] ?? report.reportType}</TableCell>
                       <TableCell>
-                        <Badge variant={STATUS_VARIANT[report.currentStatus] ?? "outline"}>
-                          {STATUS_LABELS[report.currentStatus] ?? report.currentStatus}
-                        </Badge>
+                        <StatusBadge status={report.currentStatus} />
                       </TableCell>
                       <TableCell className="text-xs text-slate-500">
                         {PAYMENT_LABELS[report.paymentStatus] ?? report.paymentStatus}

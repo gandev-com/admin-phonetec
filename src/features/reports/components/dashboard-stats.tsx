@@ -2,27 +2,14 @@
 
 import { useQuery } from "@tanstack/react-query";
 import { AlertTriangle, ClipboardList, CreditCard, TrendingUp } from "lucide-react";
+import Link from "next/link";
 
+import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
+import { StatusBadge, STATUS_LABELS } from "@/components/reports/status-badge";
 import { reportsApi } from "@/lib/api/reports";
 import type { ReportStatus } from "@/types/report";
-
-const STATUS_LABELS: Record<ReportStatus, string> = {
-  RECEIVED: "Recibido",
-  IN_DIAGNOSIS: "Diagnóstico",
-  BUDGET_SENT: "Presupuesto enviado",
-  BUDGET_ACCEPTED: "Pres. aceptado",
-  BUDGET_REJECTED: "Pres. rechazado",
-  WAITING_PARTS: "Esp. repuesto",
-  IN_REPAIR: "En reparación",
-  REPAIRED: "Reparado",
-  TESTING: "En pruebas",
-  READY_FOR_PICKUP: "Listo para recoger",
-  DELIVERED: "Entregado",
-  CANCELLED: "Cancelado",
-  IRREPARABLE: "No reparable",
-};
 
 const OPEN_STATUSES: ReportStatus[] = [
   "RECEIVED",
@@ -41,18 +28,22 @@ function StatCard({
   sub,
   icon: Icon,
   loading,
+  accentClass = "bg-slate-100 text-slate-600",
 }: {
   title: string;
   value: string | number;
   sub?: string;
   icon: React.ElementType;
   loading?: boolean;
+  accentClass?: string;
 }) {
   return (
     <Card>
-      <CardHeader className="flex flex-row items-center justify-between pb-2">
+      <CardHeader className="flex flex-row items-start justify-between pb-2">
         <CardTitle className="text-sm font-medium text-slate-500">{title}</CardTitle>
-        <Icon className="h-4 w-4 text-slate-400" />
+        <div className={`rounded-lg p-2 ${accentClass}`}>
+          <Icon className="h-4 w-4" />
+        </div>
       </CardHeader>
       <CardContent>
         {loading ? (
@@ -99,6 +90,7 @@ export function DashboardStats() {
         sub="Recibidas, diagnóstico, reparación"
         icon={ClipboardList}
         loading={loading}
+        accentClass="bg-blue-50 text-blue-600"
       />
       <StatCard
         title="Urgentes abiertas"
@@ -106,6 +98,7 @@ export function DashboardStats() {
         sub="Requieren atención inmediata"
         icon={AlertTriangle}
         loading={loading}
+        accentClass="bg-red-50 text-red-600"
       />
       <StatCard
         title="Ingresos cobrados"
@@ -113,6 +106,7 @@ export function DashboardStats() {
         sub="Total acumulado"
         icon={TrendingUp}
         loading={loading}
+        accentClass="bg-green-50 text-green-600"
       />
       <StatCard
         title="Pendiente de cobro"
@@ -120,6 +114,7 @@ export function DashboardStats() {
         sub="Parcial o sin pagar"
         icon={CreditCard}
         loading={loading}
+        accentClass="bg-amber-50 text-amber-600"
       />
     </div>
   );
@@ -153,9 +148,9 @@ export function DashboardStatusBreakdown() {
       {entries.map(([status, count]) => (
         <div
           key={status}
-          className="rounded-xl border bg-white px-4 py-3 flex items-center justify-between"
+          className="flex items-center justify-between rounded-xl border bg-white px-4 py-3"
         >
-          <span className="text-sm text-slate-600">{STATUS_LABELS[status] ?? status}</span>
+          <StatusBadge status={status} />
           <span className="text-lg font-semibold text-slate-900">{count}</span>
         </div>
       ))}
