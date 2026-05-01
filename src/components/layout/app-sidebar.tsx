@@ -2,15 +2,16 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Building2, LayoutDashboard, ShieldUser, Users } from "lucide-react";
+import { Building2, ClipboardList, LayoutDashboard, ShieldUser, Users } from "lucide-react";
 
 import { cn } from "@/lib/utils";
 
 const navigation = [
   { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
-  { href: "/customers", label: "Customers", icon: Building2 },
-  { href: "/users", label: "Users", icon: Users },
-  { href: "/profile", label: "Profile", icon: ShieldUser },
+  { href: "/reports", label: "Órdenes", icon: ClipboardList },
+  { href: "/customers", label: "Clientes", icon: Building2 },
+  { href: "/users", label: "Usuarios", icon: Users },
+  { href: "/profile", label: "Perfil", icon: ShieldUser },
 ];
 
 interface AppSidebarProps {

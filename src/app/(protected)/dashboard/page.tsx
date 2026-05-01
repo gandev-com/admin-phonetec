@@ -1,33 +1,18 @@
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { DashboardStats, DashboardStatusBreakdown } from "@/features/reports/components/dashboard-stats";
 
 export default function DashboardPage() {
   return (
     <section className="space-y-6">
       <div>
         <h1 className="text-2xl font-semibold text-slate-900">Dashboard</h1>
-        <p className="text-sm text-slate-600">Panel base listo para crecer por modulos de negocio.</p>
+        <p className="text-sm text-slate-600">Resumen de órdenes y actividad del taller.</p>
       </div>
 
-      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-sm font-medium text-slate-500">Usuarios</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="text-2xl font-semibold">Activos</p>
-            <p className="text-sm text-slate-500">Gestion desde modulo Users</p>
-          </CardContent>
-        </Card>
+      <DashboardStats />
 
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-sm font-medium text-slate-500">Clientes</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="text-2xl font-semibold">Registrados</p>
-            <p className="text-sm text-slate-500">Gestion desde modulo Customers</p>
-          </CardContent>
-        </Card>
+      <div>
+        <h2 className="mb-3 text-sm font-semibold text-slate-700">Órdenes por estado</h2>
+        <DashboardStatusBreakdown />
       </div>
     </section>
   );

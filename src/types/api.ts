@@ -6,3 +6,10 @@ export interface ApiListResponse<T> {
 }
 
 export type MaybeList<T> = T[] | ApiListResponse<T>;
+
+export interface PaginatedResponse<T> {
+  data: T[];
+  total: number;
+  page: number;
+  limit: number;
+}
