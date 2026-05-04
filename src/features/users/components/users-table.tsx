@@ -49,8 +49,8 @@ export function UsersTable() {
   });
 
   const users = usersQuery.data?.data ?? [];
-  const total = usersQuery.data?.total ?? 0;
-  const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE));
+  const total = usersQuery.data?.meta.total ?? 0;
+  const totalPages = usersQuery.data?.meta.totalPages ?? 1;
 
   return (
     <Card>

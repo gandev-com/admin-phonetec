@@ -9,11 +9,11 @@ export const usersApi = {
     const client = AUTH_DISABLED ? authlessClient : apiClient;
     const response = await client.get<MaybeList<User> | PaginatedResponse<User>>("/users", { params });
     const data = response.data;
-    if (!Array.isArray(data) && "data" in data && Array.isArray(data.data) && typeof (data as PaginatedResponse<User>).total === "number") {
+    if (!Array.isArray(data) && "meta" in data && typeof (data as PaginatedResponse<User>).meta?.total === "number") {
       return data as PaginatedResponse<User>;
     }
     const items = normalizeListResponse(data as MaybeList<User>);
-    return { data: items, total: items.length, page: params.page ?? 1, limit: params.limit ?? items.length };
+    return { data: items, meta: { total: items.length, page: params.page ?? 1, limit: params.limit ?? items.length, totalPages: 1 } };
   },
 
   async getMe(): Promise<User> {

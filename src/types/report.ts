@@ -181,8 +181,10 @@ export interface ReportListParams {
   isUrgent?: boolean;
   dateFrom?: string;
   dateTo?: string;
-  sortBy?: string;
+  sortBy?: "createdAt" | "receptionDate" | "estimatedDeliveryDate" | "priority" | "orderNumber" | "total" | "currentStatus";
   order?: "asc" | "desc";
+  activeFirst?: boolean;
+  include?: string;
   page?: number;
   limit?: number;
 }

@@ -12,6 +12,8 @@ import { Input } from "@/components/ui/input";
 import { customersApi } from "@/lib/api/customers";
 import type { CreateCustomerDto } from "@/types/customer";
 
+const PHONE_REGEX = /^(\+34)?[6-9]\d{8}$/;
+
 const schema = z.object({
   documentType: z.enum(["DNI", "NIE", "PASAPORTE", "CIF"] as const),
   document: z.string().min(1, "Obligatorio"),
@@ -19,10 +21,10 @@ const schema = z.object({
   lastName: z.string().min(1, "Obligatorio"),
   secondLastName: z.string().optional(),
   email: z.string().email("Email inválido").optional().or(z.literal("")),
-  phone1: z.string().min(1, "Obligatorio"),
-  phone2: z.string().optional(),
+  phone1: z.string().regex(PHONE_REGEX, "Formato inválido (ej: 612345678 o +34612345678)"),
+  phone2: z.string().regex(PHONE_REGEX, "Formato inválido").optional().or(z.literal("")),
   address: z.string().optional(),
-  postalCode: z.string().optional(),
+  postalCode: z.string().regex(/^\d{5}$/, "Debe tener 5 dígitos").optional().or(z.literal("")),
   city: z.string().optional(),
   province: z.string().optional(),
   dataConsent: z.boolean(),
@@ -50,14 +52,31 @@ export function CreateCustomerModal({ onClose }: CreateCustomerModalProps) {
   });
 
   const mutation = useMutation({
-    mutationFn: (data: FormValues) => customersApi.create(data as CreateCustomerDto),
+    mutationFn: (data: FormValues) => {
+      // Strip empty strings so the backend doesn't receive "" for optional fields
+      const payload: CreateCustomerDto = {
+        ...data,
+        email: data.email?.trim() || undefined,
+        phone2: data.phone2?.trim() || undefined,
+        secondLastName: data.secondLastName?.trim() || undefined,
+        address: data.address?.trim() || undefined,
+        postalCode: data.postalCode?.trim() || undefined,
+        city: data.city?.trim() || undefined,
+        province: data.province?.trim() || undefined,
+      };
+      return customersApi.create(payload);
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["customers"] });
       toast.success("Cliente creado correctamente");
       onClose();
     },
-    onError: () => {
-      toast.error("Error al crear el cliente");
+    onError: (error: unknown) => {
+      const msg =
+        (error as { response?: { data?: { message?: string | string[] } } })?.response?.data
+          ?.message;
+      const detail = Array.isArray(msg) ? msg.join(", ") : msg;
+      toast.error(detail ? `Error: ${detail}` : "Error al crear el cliente");
     },
   });
 

@@ -893,6 +893,14 @@
             }
           },
           {
+            "name": "include",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
             "name": "page",
             "required": false,
             "in": "query",
@@ -1322,6 +1330,22 @@
                 "asc",
                 "desc"
               ]
+            }
+          },
+          {
+            "name": "activeFirst",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "boolean"
+            }
+          },
+          {
+            "name": "include",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "string"
             }
           },
           {

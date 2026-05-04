@@ -53,10 +53,10 @@ export function PartsTable() {
   });
 
   const parts = partsQuery.data?.data ?? [];
-  const total = partsQuery.data?.total ?? 0;
-  const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE));
+  const total = partsQuery.data?.meta.total ?? 0;
+  const totalPages = partsQuery.data?.meta.totalPages ?? 1;
   const categories = categoriesQuery.data ?? [];
-  const lowStockCount = lowStockQuery.data?.total ?? 0;
+  const lowStockCount = lowStockQuery.data?.meta?.total ?? 0;
 
   return (
     <div className="space-y-4">

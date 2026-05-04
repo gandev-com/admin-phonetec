@@ -1383,6 +1383,7 @@ export interface operations {
                 search?: string;
                 customerId?: string;
                 brandId?: string;
+                include?: string;
                 page?: number;
                 limit?: number;
             };
@@ -1573,6 +1574,8 @@ export interface operations {
                 dateTo?: string;
                 sortBy?: "createdAt" | "receptionDate" | "estimatedDeliveryDate" | "priority" | "orderNumber" | "total" | "currentStatus";
                 order?: "asc" | "desc";
+                activeFirst?: boolean;
+                include?: string;
                 page?: number;
                 limit?: number;
             };

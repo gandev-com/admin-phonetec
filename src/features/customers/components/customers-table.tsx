@@ -41,8 +41,8 @@ export function CustomersTable() {
   });
 
   const customers = customersQuery.data?.data ?? [];
-  const total = customersQuery.data?.total ?? 0;
-  const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE));
+  const total = customersQuery.data?.meta.total ?? 0;
+  const totalPages = customersQuery.data?.meta.totalPages ?? 1;
 
   return (
     <>

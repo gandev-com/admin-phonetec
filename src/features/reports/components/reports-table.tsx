@@ -54,6 +54,7 @@ export function ReportsTable() {
         search: search || undefined,
         currentStatus: statusFilter || undefined,
         isUrgent: urgentOnly || undefined,
+        activeFirst: true,
         page,
         limit: PAGE_SIZE,
         sortBy: "receptionDate",
@@ -62,8 +63,8 @@ export function ReportsTable() {
   });
 
   const reports = reportsQuery.data?.data ?? [];
-  const total = reportsQuery.data?.total ?? 0;
-  const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE));
+  const total = reportsQuery.data?.meta.total ?? 0;
+  const totalPages = reportsQuery.data?.meta.totalPages ?? 1;
 
   return (
     <Card>
