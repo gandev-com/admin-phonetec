@@ -55,8 +55,6 @@ export function DeviceForm({ customerId, defaultValues, deviceId }: DeviceFormPr
     },
   });
 
-  const brandId = watch("brandId");
-
   const onSubmit = async (data: CreateDeviceFormValues) => {
     try {
       if (deviceId) {

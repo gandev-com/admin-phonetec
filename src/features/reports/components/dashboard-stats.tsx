@@ -2,12 +2,10 @@
 
 import { useQuery } from "@tanstack/react-query";
 import { AlertTriangle, ClipboardList, CreditCard, TrendingUp } from "lucide-react";
-import Link from "next/link";
 
-import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
-import { StatusBadge, STATUS_LABELS } from "@/components/reports/status-badge";
+import { StatusBadge } from "@/components/reports/status-badge";
 import { reportsApi } from "@/lib/api/reports";
 import type { ReportStatus } from "@/types/report";
 
@@ -74,12 +72,12 @@ export function DashboardStats() {
 
   const pendingRevenue =
     stats?.pendingRevenue != null
-      ? `${stats.pendingRevenue.toLocaleString("es-ES", { style: "currency", currency: "EUR" })}`
+      ? `${Number(stats.pendingRevenue).toLocaleString("es-ES", { style: "currency", currency: "EUR" })}`
       : "—";
 
   const totalRevenue =
     stats?.totalRevenue != null
-      ? `${stats.totalRevenue.toLocaleString("es-ES", { style: "currency", currency: "EUR" })}`
+      ? `${Number(stats.totalRevenue).toLocaleString("es-ES", { style: "currency", currency: "EUR" })}`
       : "—";
 
   return (

@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Building2, ClipboardList, LayoutDashboard, Package, Settings, ShieldUser, Smartphone, Users, Wrench } from "lucide-react";
+import { Building2, ClipboardList, LayoutDashboard, Package, Receipt, Settings, ShieldUser, Smartphone, Users, Wrench } from "lucide-react";
 
 import { cn } from "@/lib/utils";
 
@@ -12,6 +12,7 @@ const navigation = [
   { href: "/customers", label: "Clientes", icon: Building2 },
   { href: "/devices", label: "Dispositivos", icon: Smartphone },
   { href: "/parts", label: "Inventario", icon: Package },
+  { href: "/accounting", label: "Contabilidad", icon: Receipt },
   { href: "/users", label: "Usuarios", icon: Users },
   { href: "/profile", label: "Perfil", icon: ShieldUser },
   { href: "/settings", label: "Configuración", icon: Settings },

@@ -210,7 +210,6 @@ function StepIssue({
   const {
     register,
     handleSubmit,
-    watch,
     formState: { errors },
   } = useForm<IssueFormValues>({
     resolver: zodResolver(issueSchema),
