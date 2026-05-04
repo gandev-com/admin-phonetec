@@ -22,7 +22,7 @@ export function RecentReports() {
         <CardTitle className="text-sm font-semibold">Órdenes recientes</CardTitle>
         <Link
           href="/reports"
-          className="text-xs font-medium text-slate-500 hover:text-slate-900"
+          className="text-xs font-medium text-muted-foreground hover:text-foreground"
         >
           Ver todas →
         </Link>
@@ -37,7 +37,7 @@ export function RecentReports() {
         ) : null}
 
         {!query.isPending && reports.length === 0 ? (
-          <p className="py-6 text-center text-sm text-slate-500">Sin órdenes recientes</p>
+          <p className="py-6 text-center text-sm text-muted-foreground">Sin órdenes recientes</p>
         ) : null}
 
         {!query.isPending && reports.length > 0 ? (
@@ -48,7 +48,7 @@ export function RecentReports() {
                   <div className="flex items-center gap-2">
                     <Link
                       href={`/reports/${report.id}`}
-                      className="font-mono text-xs font-semibold text-slate-900 hover:underline"
+                      className="font-mono text-xs font-semibold text-foreground hover:underline"
                     >
                       {report.orderNumber}
                     </Link>
@@ -56,7 +56,7 @@ export function RecentReports() {
                       <span className="text-xs font-medium text-red-600">⚑ Urgente</span>
                     ) : null}
                   </div>
-                  <p className="mt-0.5 truncate text-xs text-slate-500">
+                  <p className="mt-0.5 truncate text-xs text-muted-foreground">
                     {report.customer
                       ? `${report.customer.firstName} ${report.customer.lastName}`
                       : `Cliente #${report.customerId}`}
@@ -67,7 +67,7 @@ export function RecentReports() {
                 </div>
                 <div className="flex items-center gap-2 shrink-0">
                   <StatusBadge status={report.currentStatus} />
-                  <span className="text-xs text-slate-400">
+                  <span className="text-xs text-muted-foreground">
                     {new Date(report.createdAt).toLocaleDateString("es-ES", { day: "2-digit", month: "short" })}
                   </span>
                 </div>

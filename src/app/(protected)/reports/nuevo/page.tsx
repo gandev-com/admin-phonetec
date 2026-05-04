@@ -68,7 +68,7 @@ function StepCustomer({
   return (
     <div className="space-y-4">
       <div className="relative">
-        <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
+        <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
         <Input
           value={search}
           onChange={(e) => setSearch(e.target.value)}
@@ -78,7 +78,7 @@ function StepCustomer({
       </div>
 
       {query.isPending ? (
-        <p className="py-4 text-center text-sm text-slate-400">Buscando...</p>
+        <p className="py-4 text-center text-sm text-muted-foreground">Buscando...</p>
       ) : null}
 
       <div className="space-y-2">
@@ -93,12 +93,12 @@ function StepCustomer({
               className={cn(
                 "w-full rounded-xl border px-4 py-3 text-left transition-all",
                 isSelected
-                  ? "border-slate-900 bg-slate-900 text-white"
-                  : "border-slate-200 bg-white hover:border-slate-300 hover:bg-slate-50",
+                  ? "border-primary bg-primary text-primary-foreground"
+                  : "border-border bg-background hover:border-ring hover:bg-muted",
               )}
             >
               <p className="text-sm font-medium">{fullName}</p>
-              <p className={cn("text-xs mt-0.5", isSelected ? "text-slate-300" : "text-slate-500")}>
+              <p className={cn("text-xs mt-0.5", isSelected ? "text-primary-foreground/70" : "text-muted-foreground")}>
                 {customer.documentType} {customer.document} · {customer.phone1}
               </p>
             </button>
@@ -107,7 +107,7 @@ function StepCustomer({
       </div>
 
       {!query.isPending && customers.length === 0 && debouncedSearch ? (
-        <p className="py-4 text-center text-sm text-slate-400">
+        <p className="py-4 text-center text-sm text-muted-foreground">
           No se encontraron clientes. Busca con otro término.
         </p>
       ) : null}
@@ -148,11 +148,11 @@ function StepDevice({
   return (
     <div className="space-y-3">
       {query.isPending ? (
-        <p className="py-4 text-center text-sm text-slate-400">Cargando dispositivos...</p>
+        <p className="py-4 text-center text-sm text-muted-foreground">Cargando dispositivos...</p>
       ) : null}
 
       {!query.isPending && devices.length === 0 ? (
-        <div className="rounded-xl border border-dashed p-6 text-center text-sm text-slate-500">
+        <div className="rounded-xl border border-dashed p-6 text-center text-sm text-muted-foreground">
           Este cliente no tiene dispositivos registrados.
         </div>
       ) : null}
@@ -169,12 +169,12 @@ function StepDevice({
             className={cn(
               "w-full rounded-xl border px-4 py-3 text-left transition-all",
               isSelected
-                ? "border-slate-900 bg-slate-900 text-white"
-                : "border-slate-200 bg-white hover:border-slate-300 hover:bg-slate-50",
+                ? "border-primary bg-primary text-primary-foreground"
+                : "border-border bg-background hover:border-ring hover:bg-muted",
             )}
           >
             <p className="text-sm font-medium">{label}</p>
-            <p className={cn("mt-0.5 text-xs", isSelected ? "text-slate-300" : "text-slate-500")}>
+            <p className={cn("mt-0.5 text-xs", isSelected ? "text-primary-foreground/70" : "text-muted-foreground")}>
               {[device.imeiIn && `IMEI: ${device.imeiIn}`, device.serialNumber && `S/N: ${device.serialNumber}`]
                 .filter(Boolean)
                 .join(" · ") || "Sin IMEI ni número de serie"}
@@ -226,10 +226,10 @@ function StepIssue({
     <form id="step3-form" onSubmit={handleSubmit(onChange)} className="space-y-4">
       <div className="grid grid-cols-2 gap-4">
         <div className="space-y-1.5">
-          <label className="text-xs font-medium text-slate-700">Tipo de orden</label>
+          <label className="text-xs font-medium text-foreground">Tipo de orden</label>
           <select
             {...register("reportType")}
-            className="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm outline-none focus:border-slate-400"
+            className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm outline-none focus:border-ring"
           >
             <option value="REPAIR_ORDER">Reparación</option>
             <option value="BUDGET">Presupuesto</option>
@@ -239,10 +239,10 @@ function StepIssue({
         </div>
 
         <div className="space-y-1.5">
-          <label className="text-xs font-medium text-slate-700">Prioridad</label>
+          <label className="text-xs font-medium text-foreground">Prioridad</label>
           <select
             {...register("priority")}
-            className="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm outline-none focus:border-slate-400"
+            className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm outline-none focus:border-ring"
           >
             <option value="LOW">Baja</option>
             <option value="NORMAL">Normal</option>
@@ -254,16 +254,16 @@ function StepIssue({
 
       <div className="flex items-center gap-2">
         <input type="checkbox" id="isUrgent" {...register("isUrgent")} className="rounded" />
-        <label htmlFor="isUrgent" className="text-sm text-slate-700">Marcar como urgente</label>
+        <label htmlFor="isUrgent" className="text-sm text-foreground">Marcar como urgente</label>
       </div>
 
       <div className="space-y-1.5">
-        <label className="text-xs font-medium text-slate-700">Descripción de la avería *</label>
+        <label className="text-xs font-medium text-foreground">Descripción de la avería *</label>
         <textarea
           {...register("reportedIssue")}
           rows={3}
           placeholder="Describe el problema reportado por el cliente..."
-          className="w-full resize-none rounded-lg border border-slate-200 px-3 py-2 text-sm outline-none focus:border-slate-400"
+          className="w-full resize-none rounded-lg border border-border bg-background px-3 py-2 text-sm outline-none focus:border-ring"
         />
         {errors.reportedIssue ? (
           <p className="text-xs text-red-600">{errors.reportedIssue.message}</p>
@@ -271,29 +271,29 @@ function StepIssue({
       </div>
 
       <div className="space-y-1.5">
-        <label className="text-xs font-medium text-slate-700">Estado de entrada</label>
+        <label className="text-xs font-medium text-foreground">Estado de entrada</label>
         <textarea
           {...register("entryCondition")}
           rows={2}
           placeholder="Condición física del dispositivo al recibirlo..."
-          className="w-full resize-none rounded-lg border border-slate-200 px-3 py-2 text-sm outline-none focus:border-slate-400"
+          className="w-full resize-none rounded-lg border border-border bg-background px-3 py-2 text-sm outline-none focus:border-ring"
         />
       </div>
 
       <div className="grid grid-cols-2 gap-4">
         <div className="space-y-1.5">
-          <label className="text-xs font-medium text-slate-700">Presupuesto inicial (€)</label>
+          <label className="text-xs font-medium text-foreground">Presupuesto inicial (€)</label>
           <Input type="number" step="0.01" min="0" placeholder="0.00" {...register("initialBudget")} />
         </div>
       </div>
 
       <div className="space-y-1.5">
-        <label className="text-xs font-medium text-slate-700">Notas internas</label>
+        <label className="text-xs font-medium text-foreground">Notas internas</label>
         <textarea
           {...register("internalNotes")}
           rows={2}
           placeholder="Notas solo visibles para el taller..."
-          className="w-full resize-none rounded-lg border border-slate-200 px-3 py-2 text-sm outline-none focus:border-slate-400"
+          className="w-full resize-none rounded-lg border border-border bg-background px-3 py-2 text-sm outline-none focus:border-ring"
         />
       </div>
     </form>
@@ -335,55 +335,55 @@ function StepSummary({ data }: { data: WizardData }) {
   return (
     <div className="space-y-4">
       <div className="grid gap-3 sm:grid-cols-2">
-        <div className="rounded-xl border bg-slate-50 p-4">
-          <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">Cliente</p>
+        <div className="rounded-xl border bg-muted/40 p-4">
+          <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Cliente</p>
           {customer ? (
-            <p className="mt-1 text-sm font-medium text-slate-900">
+            <p className="mt-1 text-sm font-medium text-foreground">
               {customer.firstName} {customer.lastName} {customer.secondLastName}
             </p>
           ) : (
-            <p className="mt-1 text-sm text-slate-400">ID: {data.customerId}</p>
+            <p className="mt-1 text-sm text-muted-foreground">ID: {data.customerId}</p>
           )}
         </div>
 
-        <div className="rounded-xl border bg-slate-50 p-4">
-          <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">Dispositivo</p>
+        <div className="rounded-xl border bg-muted/40 p-4">
+          <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Dispositivo</p>
           {device ? (
-            <p className="mt-1 text-sm font-medium text-slate-900">
+            <p className="mt-1 text-sm font-medium text-foreground">
               {device.brand?.name ?? ""} {device.model ?? ""}
             </p>
           ) : (
-            <p className="mt-1 text-sm text-slate-400">ID: {data.deviceId}</p>
+            <p className="mt-1 text-sm text-muted-foreground">ID: {data.deviceId}</p>
           )}
         </div>
 
-        <div className="rounded-xl border bg-slate-50 p-4">
-          <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">Tipo / Prioridad</p>
-          <p className="mt-1 text-sm font-medium text-slate-900">
+        <div className="rounded-xl border bg-muted/40 p-4">
+          <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Tipo / Prioridad</p>
+          <p className="mt-1 text-sm font-medium text-foreground">
             {TYPE_LABELS[data.reportType]} · {PRIORITY_LABELS[data.priority]}
             {data.isUrgent ? " · ⚑ Urgente" : ""}
           </p>
         </div>
 
         {data.initialBudget ? (
-          <div className="rounded-xl border bg-slate-50 p-4">
-            <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">Presupuesto inicial</p>
-            <p className="mt-1 text-sm font-medium text-slate-900">
+          <div className="rounded-xl border bg-muted/40 p-4">
+            <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Presupuesto inicial</p>
+            <p className="mt-1 text-sm font-medium text-foreground">
               {parseFloat(data.initialBudget).toFixed(2)} €
             </p>
           </div>
         ) : null}
       </div>
 
-      <div className="rounded-xl border bg-slate-50 p-4">
-        <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">Avería reportada</p>
-        <p className="mt-1 text-sm text-slate-700 whitespace-pre-wrap">{data.reportedIssue || "—"}</p>
+      <div className="rounded-xl border bg-muted/40 p-4">
+        <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Avería reportada</p>
+        <p className="mt-1 text-sm text-foreground whitespace-pre-wrap">{data.reportedIssue || "—"}</p>
       </div>
 
       {data.entryCondition ? (
-        <div className="rounded-xl border bg-slate-50 p-4">
-          <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">Estado de entrada</p>
-          <p className="mt-1 text-sm text-slate-700 whitespace-pre-wrap">{data.entryCondition}</p>
+        <div className="rounded-xl border bg-muted/40 p-4">
+          <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Estado de entrada</p>
+          <p className="mt-1 text-sm text-foreground whitespace-pre-wrap">{data.entryCondition}</p>
         </div>
       ) : null}
     </div>
@@ -454,8 +454,8 @@ export default function NuevoInformePage() {
   return (
     <section className="mx-auto max-w-2xl space-y-6">
       <div>
-        <h1 className="text-2xl font-semibold text-slate-900">Nueva orden de reparación</h1>
-        <p className="text-sm text-slate-500">Completa los datos en 4 pasos.</p>
+        <h1 className="text-2xl font-semibold text-foreground">Nueva orden de reparación</h1>
+        <p className="text-sm text-muted-foreground">Completa los datos en 4 pasos.</p>
       </div>
 
       {/* Stepper */}
@@ -466,9 +466,9 @@ export default function NuevoInformePage() {
               <div
                 className={cn(
                   "flex h-8 w-8 items-center justify-center rounded-full border-2 text-xs font-semibold transition-all",
-                  step > s.id && "border-slate-900 bg-slate-900 text-white",
-                  step === s.id && "border-slate-900 text-slate-900",
-                  step < s.id && "border-slate-300 text-slate-400",
+                  step > s.id && "border-primary bg-primary text-primary-foreground",
+                  step === s.id && "border-primary text-primary",
+                  step < s.id && "border-border text-muted-foreground",
                 )}
               >
                 {step > s.id ? <Check className="h-4 w-4" /> : s.id}
@@ -476,14 +476,14 @@ export default function NuevoInformePage() {
               <p
                 className={cn(
                   "mt-1 hidden text-xs sm:block",
-                  step === s.id ? "font-medium text-slate-900" : "text-slate-400",
+                  step === s.id ? "font-medium text-foreground" : "text-muted-foreground",
                 )}
               >
                 {s.title}
               </p>
             </div>
             {idx < STEPS.length - 1 ? (
-              <div className={cn("mx-2 h-0.5 flex-1 transition-all", step > s.id ? "bg-slate-900" : "bg-slate-200")} />
+              <div className={cn("mx-2 h-0.5 flex-1 transition-all", step > s.id ? "bg-primary" : "bg-border")} />
             ) : null}
           </div>
         ))}

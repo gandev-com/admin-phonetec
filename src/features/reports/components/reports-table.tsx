@@ -74,7 +74,7 @@ export function ReportsTable() {
           <select
             value={statusFilter}
             onChange={(e) => { setStatusFilter(e.target.value as ReportStatus | ""); setPage(1); }}
-            className="rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-700 outline-none focus:border-slate-400"
+            className="rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground outline-none focus:border-ring"
           >
             <option value="">Todos los estados</option>
             {ALL_STATUSES.map((s) => (
@@ -120,7 +120,7 @@ export function ReportsTable() {
         ) : null}
 
         {!reportsQuery.isPending && !reportsQuery.isError && reports.length === 0 ? (
-          <div className="rounded-xl border border-dashed p-8 text-center text-sm text-slate-500">
+          <div className="rounded-xl border border-dashed p-8 text-center text-sm text-muted-foreground">
             No hay órdenes para mostrar.
           </div>
         ) : null}
@@ -130,7 +130,7 @@ export function ReportsTable() {
             <div className="overflow-hidden rounded-xl border">
               <Table>
                 <TableHeader>
-                  <TableRow className="bg-slate-50/50">
+                  <TableRow className="bg-muted/40">
                     <TableHead>Nº Orden</TableHead>
                     <TableHead>Cliente</TableHead>
                     <TableHead>Dispositivo</TableHead>
@@ -164,16 +164,16 @@ export function ReportsTable() {
                       <TableCell>
                         <StatusBadge status={report.currentStatus} />
                       </TableCell>
-                      <TableCell className="text-xs text-slate-500">
+                      <TableCell className="text-xs text-muted-foreground">
                         {PAYMENT_LABELS[report.paymentStatus] ?? report.paymentStatus}
                       </TableCell>
-                      <TableCell className="text-xs text-slate-500">
+                      <TableCell className="text-xs text-muted-foreground">
                         {new Date(report.createdAt).toLocaleDateString("es-ES")}
                       </TableCell>
                       <TableCell>
                         <Link
                           href={`/reports/${report.id}`}
-                          className="inline-flex items-center rounded-lg border border-slate-200 bg-white px-3 py-1 text-xs font-medium text-slate-700 hover:bg-slate-50"
+                          className="inline-flex items-center rounded-lg border border-border bg-background px-3 py-1 text-xs font-medium text-foreground hover:bg-muted"
                         >
                           Ver
                         </Link>
@@ -184,7 +184,7 @@ export function ReportsTable() {
               </Table>
             </div>
 
-            <div className="flex items-center justify-between text-sm text-slate-500">
+            <div className="flex items-center justify-between text-sm text-muted-foreground">
               <span>
                 {total} orden{total !== 1 ? "es" : ""} &mdash; página {page} de {totalPages}
               </span>

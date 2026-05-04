@@ -86,14 +86,14 @@ export function CreateCustomerModal({ onClose }: CreateCustomerModalProps) {
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
-      <div className="w-full max-w-2xl rounded-2xl bg-white shadow-xl">
+      <div className="w-full max-w-2xl rounded-2xl bg-card shadow-xl">
         {/* Header */}
         <div className="flex items-center justify-between border-b px-6 py-4">
-          <h2 className="text-lg font-semibold text-slate-900">Nuevo cliente</h2>
+          <h2 className="text-lg font-semibold text-foreground">Nuevo cliente</h2>
           <button
             type="button"
             onClick={onClose}
-            className="rounded-lg p-1 text-slate-400 hover:bg-slate-100 hover:text-slate-600"
+            className="rounded-lg p-1 text-muted-foreground hover:bg-muted hover:text-foreground"
           >
             <X className="h-5 w-5" />
           </button>
@@ -104,10 +104,10 @@ export function CreateCustomerModal({ onClose }: CreateCustomerModalProps) {
           <div className="grid gap-4 sm:grid-cols-2">
             {/* Document type */}
             <div className="space-y-1">
-              <label className="text-xs font-medium text-slate-600">Tipo documento</label>
+              <label className="text-xs font-medium text-foreground">Tipo documento</label>
               <select
                 {...register("documentType")}
-                className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm outline-none focus:border-slate-400"
+                className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm outline-none focus:border-ring"
               >
                 <option value="DNI">DNI</option>
                 <option value="NIE">NIE</option>
@@ -119,72 +119,72 @@ export function CreateCustomerModal({ onClose }: CreateCustomerModalProps) {
 
             {/* Document number */}
             <div className="space-y-1">
-              <label className="text-xs font-medium text-slate-600">Nº documento *</label>
+              <label className="text-xs font-medium text-foreground">Nº documento *</label>
               <Input {...register("document")} placeholder="12345678A" />
               {errors.document ? <p className="text-xs text-red-500">{errors.document.message}</p> : null}
             </div>
 
             {/* First name */}
             <div className="space-y-1">
-              <label className="text-xs font-medium text-slate-600">Nombre *</label>
+              <label className="text-xs font-medium text-foreground">Nombre *</label>
               <Input {...register("firstName")} placeholder="Juan" />
               {errors.firstName ? <p className="text-xs text-red-500">{errors.firstName.message}</p> : null}
             </div>
 
             {/* Last name */}
             <div className="space-y-1">
-              <label className="text-xs font-medium text-slate-600">Primer apellido *</label>
+              <label className="text-xs font-medium text-foreground">Primer apellido *</label>
               <Input {...register("lastName")} placeholder="García" />
               {errors.lastName ? <p className="text-xs text-red-500">{errors.lastName.message}</p> : null}
             </div>
 
             {/* Second last name */}
             <div className="space-y-1">
-              <label className="text-xs font-medium text-slate-600">Segundo apellido</label>
+              <label className="text-xs font-medium text-foreground">Segundo apellido</label>
               <Input {...register("secondLastName")} placeholder="López" />
             </div>
 
             {/* Email */}
             <div className="space-y-1">
-              <label className="text-xs font-medium text-slate-600">Email</label>
+              <label className="text-xs font-medium text-foreground">Email</label>
               <Input {...register("email")} type="email" placeholder="juan@example.com" />
               {errors.email ? <p className="text-xs text-red-500">{errors.email.message}</p> : null}
             </div>
 
             {/* Phone 1 */}
             <div className="space-y-1">
-              <label className="text-xs font-medium text-slate-600">Teléfono 1 *</label>
+              <label className="text-xs font-medium text-foreground">Teléfono 1 *</label>
               <Input {...register("phone1")} placeholder="612345678" />
               {errors.phone1 ? <p className="text-xs text-red-500">{errors.phone1.message}</p> : null}
             </div>
 
             {/* Phone 2 */}
             <div className="space-y-1">
-              <label className="text-xs font-medium text-slate-600">Teléfono 2</label>
+              <label className="text-xs font-medium text-foreground">Teléfono 2</label>
               <Input {...register("phone2")} placeholder="912345678" />
             </div>
 
             {/* Address */}
             <div className="space-y-1 sm:col-span-2">
-              <label className="text-xs font-medium text-slate-600">Dirección</label>
+              <label className="text-xs font-medium text-foreground">Dirección</label>
               <Input {...register("address")} placeholder="Calle Mayor 1, 2ºA" />
             </div>
 
             {/* Postal code */}
             <div className="space-y-1">
-              <label className="text-xs font-medium text-slate-600">Código postal</label>
+              <label className="text-xs font-medium text-foreground">Código postal</label>
               <Input {...register("postalCode")} placeholder="28001" />
             </div>
 
             {/* City */}
             <div className="space-y-1">
-              <label className="text-xs font-medium text-slate-600">Ciudad</label>
+              <label className="text-xs font-medium text-foreground">Ciudad</label>
               <Input {...register("city")} placeholder="Madrid" />
             </div>
 
             {/* Province */}
             <div className="space-y-1">
-              <label className="text-xs font-medium text-slate-600">Provincia</label>
+              <label className="text-xs font-medium text-foreground">Provincia</label>
               <Input {...register("province")} placeholder="Madrid" />
             </div>
 
@@ -194,9 +194,9 @@ export function CreateCustomerModal({ onClose }: CreateCustomerModalProps) {
                 type="checkbox"
                 id="dataConsent"
                 {...register("dataConsent")}
-                className="h-4 w-4 rounded border-slate-300"
+                className="h-4 w-4 rounded border-border"
               />
-              <label htmlFor="dataConsent" className="text-sm text-slate-700">
+              <label htmlFor="dataConsent" className="text-sm text-foreground">
                 El cliente ha aceptado el tratamiento de datos (RGPD)
               </label>
             </div>

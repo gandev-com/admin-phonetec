@@ -15,8 +15,8 @@ import { reportsApi } from "@/lib/api/reports";
 function Field({ label, value }: { label: string; value: React.ReactNode }) {
   return (
     <div>
-      <p className="text-xs font-medium text-slate-500">{label}</p>
-      <p className="mt-0.5 text-sm text-slate-900">{value ?? "—"}</p>
+      <p className="text-xs font-medium text-muted-foreground">{label}</p>
+      <p className="mt-0.5 text-sm text-foreground">{value ?? "—"}</p>
     </div>
   );
 }
@@ -64,8 +64,8 @@ export function CustomerDetail({ id }: CustomerDetailProps) {
       {/* Header */}
       <div className="flex items-start justify-between gap-4">
         <div>
-          <h2 className="text-xl font-semibold text-slate-900">{fullName}</h2>
-          <p className="mt-0.5 text-sm text-slate-500">
+          <h2 className="text-xl font-semibold text-foreground">{fullName}</h2>
+          <p className="mt-0.5 text-sm text-muted-foreground">
             {customer.documentType} {customer.document}
           </p>
         </div>
@@ -101,11 +101,11 @@ export function CustomerDetail({ id }: CustomerDetailProps) {
           </CardHeader>
           <CardContent>
             {customer.internalNotes ? (
-              <p className="whitespace-pre-wrap text-sm text-slate-700">{customer.internalNotes}</p>
+              <p className="whitespace-pre-wrap text-sm text-foreground">{customer.internalNotes}</p>
             ) : (
-              <p className="text-sm text-slate-400">Sin notas registradas</p>
+              <p className="text-sm text-muted-foreground">Sin notas registradas</p>
             )}
-            <p className="mt-4 text-xs text-slate-400">
+            <p className="mt-4 text-xs text-muted-foreground">
               Cliente desde {new Date(customer.createdAt).toLocaleDateString("es-ES", { year: "numeric", month: "long", day: "numeric" })}
             </p>
           </CardContent>
@@ -121,7 +121,7 @@ export function CustomerDetail({ id }: CustomerDetailProps) {
           </CardTitle>
           <Link
             href={`/reports?customerId=${customer.id}`}
-            className="text-xs font-medium text-slate-500 hover:text-slate-900"
+            className="text-xs font-medium text-muted-foreground hover:text-foreground"
           >
             Ver todas →
           </Link>
@@ -136,14 +136,14 @@ export function CustomerDetail({ id }: CustomerDetailProps) {
           ) : null}
 
           {!ordersQuery.isPending && orders.length === 0 ? (
-            <p className="py-4 text-center text-sm text-slate-400">Sin órdenes registradas</p>
+            <p className="py-4 text-center text-sm text-muted-foreground">Sin órdenes registradas</p>
           ) : null}
 
           {!ordersQuery.isPending && orders.length > 0 ? (
             <div className="overflow-hidden rounded-xl border">
               <Table>
                 <TableHeader>
-                  <TableRow className="bg-slate-50/50">
+                  <TableRow className="bg-muted/40">
                     <TableHead>Nº Orden</TableHead>
                     <TableHead>Dispositivo</TableHead>
                     <TableHead>Estado</TableHead>
@@ -158,7 +158,7 @@ export function CustomerDetail({ id }: CustomerDetailProps) {
                         {order.isUrgent ? <span className="mr-1 text-red-500">⚑</span> : null}
                         {order.orderNumber}
                       </TableCell>
-                      <TableCell className="text-sm text-slate-600">
+                      <TableCell className="text-sm text-muted-foreground">
                         {order.device
                           ? `${order.device.brand?.name ?? ""} ${order.device.model ?? ""}`.trim() || `#${order.deviceId}`
                           : `#${order.deviceId}`}
@@ -166,13 +166,13 @@ export function CustomerDetail({ id }: CustomerDetailProps) {
                       <TableCell>
                         <StatusBadge status={order.currentStatus} />
                       </TableCell>
-                      <TableCell className="text-xs text-slate-500">
+                      <TableCell className="text-xs text-muted-foreground">
                         {new Date(order.createdAt).toLocaleDateString("es-ES")}
                       </TableCell>
                       <TableCell>
                         <Link
                           href={`/reports/${order.id}`}
-                          className="inline-flex items-center rounded-lg border border-slate-200 bg-white px-3 py-1 text-xs font-medium text-slate-700 hover:bg-slate-50"
+                          className="inline-flex items-center rounded-lg border border-border bg-background px-3 py-1 text-xs font-medium text-foreground hover:bg-muted"
                         >
                           Ver
                         </Link>

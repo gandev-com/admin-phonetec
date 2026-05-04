@@ -28,7 +28,7 @@ function StatCard({
   sub,
   icon: Icon,
   loading,
-  accentClass = "bg-slate-100 text-slate-600",
+  accentClass = "bg-muted text-muted-foreground",
 }: {
   title: string;
   value: string | number;
@@ -40,7 +40,7 @@ function StatCard({
   return (
     <Card>
       <CardHeader className="flex flex-row items-start justify-between pb-2">
-        <CardTitle className="text-sm font-medium text-slate-500">{title}</CardTitle>
+        <CardTitle className="text-sm font-medium text-muted-foreground">{title}</CardTitle>
         <div className={`rounded-lg p-2 ${accentClass}`}>
           <Icon className="h-4 w-4" />
         </div>
@@ -50,8 +50,8 @@ function StatCard({
           <Skeleton className="h-8 w-24" />
         ) : (
           <>
-            <p className="text-2xl font-bold text-slate-900">{value}</p>
-            {sub ? <p className="mt-1 text-xs text-slate-500">{sub}</p> : null}
+            <p className="text-2xl font-bold text-foreground">{value}</p>
+            {sub ? <p className="mt-1 text-xs text-muted-foreground">{sub}</p> : null}
           </>
         )}
       </CardContent>
@@ -148,10 +148,10 @@ export function DashboardStatusBreakdown() {
       {entries.map(([status, count]) => (
         <div
           key={status}
-          className="flex items-center justify-between rounded-xl border bg-white px-4 py-3"
+          className="flex items-center justify-between rounded-xl border bg-card px-4 py-3"
         >
           <StatusBadge status={status} />
-          <span className="text-lg font-semibold text-slate-900">{count}</span>
+          <span className="text-lg font-semibold text-foreground">{count}</span>
         </div>
       ))}
     </div>

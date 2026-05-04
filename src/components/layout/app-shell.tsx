@@ -7,7 +7,7 @@ interface AppShellProps {
 
 export function AppShell({ children }: AppShellProps) {
   return (
-    <div className="flex min-h-screen bg-slate-50">
+    <div className="flex min-h-screen bg-background">
       <div className="sticky top-0 hidden h-screen md:block">
         <AppSidebar />
       </div>

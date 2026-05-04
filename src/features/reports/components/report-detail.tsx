@@ -50,8 +50,8 @@ const PAYMENT_LABELS: Record<PaymentStatus, string> = {
 function Field({ label, value }: { label: string; value: React.ReactNode }) {
   return (
     <div>
-      <p className="text-xs font-medium text-slate-500">{label}</p>
-      <p className="mt-0.5 text-sm text-slate-900">{value ?? "—"}</p>
+      <p className="text-xs font-medium text-muted-foreground">{label}</p>
+      <p className="mt-0.5 text-sm text-foreground">{value ?? "—"}</p>
     </div>
   );
 }
@@ -95,7 +95,7 @@ export function ReportDetail({ id }: ReportDetailProps) {
       <div className="flex items-start justify-between gap-4">
         <div>
           <div className="flex items-center gap-3">
-            <h2 className="text-xl font-semibold text-slate-900 font-mono">
+            <h2 className="text-xl font-semibold text-foreground font-mono">
               {report.orderNumber}
             </h2>
             {report.isUrgent ? (
@@ -108,7 +108,7 @@ export function ReportDetail({ id }: ReportDetailProps) {
               {PAYMENT_LABELS[report.paymentStatus] ?? report.paymentStatus}
             </Badge>
           </div>
-          <p className="mt-1 text-sm text-slate-500">
+          <p className="mt-1 text-sm text-muted-foreground">
             Creado el {new Date(report.createdAt).toLocaleDateString("es-ES")} &middot;{" "}
             Tipo: {report.reportType} &middot; Prioridad: {report.priority}
           </p>
@@ -202,7 +202,7 @@ export function ReportDetail({ id }: ReportDetailProps) {
           <CardContent>
             <table className="w-full text-sm">
               <thead>
-                <tr className="border-b text-left text-xs text-slate-500">
+                <tr className="border-b text-left text-xs text-muted-foreground">
                   <th className="pb-2 pr-4 font-medium">Repuesto</th>
                   <th className="pb-2 pr-4 font-medium">Cant.</th>
                   <th className="pb-2 font-medium">Precio unit.</th>
@@ -231,7 +231,7 @@ export function ReportDetail({ id }: ReportDetailProps) {
             <CardTitle className="text-sm">Notas internas</CardTitle>
           </CardHeader>
           <CardContent>
-            <p className="text-sm text-slate-700 whitespace-pre-wrap">{report.internalNotes}</p>
+            <p className="text-sm text-foreground whitespace-pre-wrap">{report.internalNotes}</p>
           </CardContent>
         </Card>
       ) : null}

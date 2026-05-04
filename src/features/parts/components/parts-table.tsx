@@ -89,7 +89,7 @@ export function PartsTable() {
               <select
                 value={category}
                 onChange={(e) => { setCategory(e.target.value); setPage(1); }}
-                className="rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-700 outline-none focus:border-slate-400"
+                className="rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground outline-none focus:border-ring"
               >
                 <option value="">Todas las categorías</option>
                 {categories.map((cat) => (
@@ -122,7 +122,7 @@ export function PartsTable() {
           ) : null}
 
           {!partsQuery.isPending && !partsQuery.isError && parts.length === 0 ? (
-            <div className="rounded-xl border border-dashed p-8 text-center text-sm text-slate-500">
+            <div className="rounded-xl border border-dashed p-8 text-center text-sm text-muted-foreground">
               No hay repuestos para mostrar.
             </div>
           ) : null}
@@ -132,7 +132,7 @@ export function PartsTable() {
               <div className="overflow-hidden rounded-xl border">
                 <Table>
                   <TableHeader>
-                    <TableRow className="bg-slate-50/50">
+                    <TableRow className="bg-muted/40">
                       <TableHead>Repuesto</TableHead>
                       <TableHead>Referencia</TableHead>
                       <TableHead>Categoría</TableHead>
@@ -150,30 +150,30 @@ export function PartsTable() {
                         <TableRow
                           key={part.id}
                           className={cn(
-                            "hover:bg-slate-50/50",
+                            "hover:bg-muted/40",
                             isOut && "bg-red-50/40",
                           )}
                         >
                           <TableCell>
-                            <p className="text-sm font-medium text-slate-900">{part.name}</p>
+                            <p className="text-sm font-medium text-foreground">{part.name}</p>
                             {part.description ? (
-                              <p className="text-xs text-slate-400">{part.description}</p>
+                              <p className="text-xs text-muted-foreground">{part.description}</p>
                             ) : null}
                           </TableCell>
                           <TableCell>
                             {part.code ? (
-                              <code className="rounded bg-slate-100 px-1.5 py-0.5 text-xs font-mono text-slate-600">
+                              <code className="rounded bg-muted px-1.5 py-0.5 text-xs font-mono text-muted-foreground">
                                 {part.code}
                               </code>
                             ) : (
-                              <span className="text-xs text-slate-400">—</span>
+                              <span className="text-xs text-muted-foreground">—</span>
                             )}
                           </TableCell>
                           <TableCell>
                             {part.category ? (
                               <Badge variant="secondary" className="text-xs">{part.category}</Badge>
                             ) : (
-                              <span className="text-xs text-slate-400">—</span>
+                              <span className="text-xs text-muted-foreground">—</span>
                             )}
                           </TableCell>
                           <TableCell className="text-center">
@@ -189,18 +189,18 @@ export function PartsTable() {
                               {isOut ? "Agotado" : `${part.stock} uds`}
                             </Badge>
                             {part.minStock > 0 ? (
-                              <p className="mt-0.5 text-xs text-slate-400">mín. {part.minStock}</p>
+                              <p className="mt-0.5 text-xs text-muted-foreground">mín. {part.minStock}</p>
                             ) : null}
                           </TableCell>
-                          <TableCell className="text-xs text-slate-500">
+                          <TableCell className="text-xs text-muted-foreground">
                             {part.location ?? "—"}
                           </TableCell>
-                          <TableCell className="text-right text-sm font-medium text-slate-900">
+                          <TableCell className="text-right text-sm font-medium text-foreground">
                             {part.salePrice != null
                               ? `${part.salePrice.toFixed(2)} €`
                               : "—"}
                           </TableCell>
-                          <TableCell className="text-xs text-slate-500">
+                          <TableCell className="text-xs text-muted-foreground">
                             {part.supplier ?? "—"}
                           </TableCell>
                         </TableRow>
@@ -210,7 +210,7 @@ export function PartsTable() {
                 </Table>
               </div>
 
-              <div className="flex items-center justify-between text-sm text-slate-500">
+              <div className="flex items-center justify-between text-sm text-muted-foreground">
                 <span>
                   {total} repuesto{total !== 1 ? "s" : ""} &mdash; página {page} de {totalPages}
                 </span>

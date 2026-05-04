@@ -13,9 +13,9 @@ export function PageHeader({ title, description, action }: PageHeaderProps) {
     <div>
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-lg font-semibold text-slate-900">{title}</h2>
+          <h2 className="text-lg font-semibold text-foreground">{title}</h2>
           {description ? (
-            <p className="mt-0.5 text-sm text-slate-500">{description}</p>
+            <p className="mt-0.5 text-sm text-muted-foreground">{description}</p>
           ) : null}
         </div>
         {action ? <div>{action}</div> : null}

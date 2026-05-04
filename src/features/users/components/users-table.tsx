@@ -60,7 +60,7 @@ export function UsersTable() {
           <select
             value={roleFilter}
             onChange={(e) => { setRoleFilter(e.target.value as Role | ""); setPage(1); }}
-            className="rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-700 outline-none focus:border-slate-400"
+            className="rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground outline-none focus:border-ring"
           >
             <option value="">Todos los roles</option>
             {ALL_ROLES.map((r) => (
@@ -92,7 +92,7 @@ export function UsersTable() {
         ) : null}
 
         {!usersQuery.isPending && !usersQuery.isError && users.length === 0 ? (
-          <div className="rounded-xl border border-dashed p-8 text-center text-sm text-slate-500">
+          <div className="rounded-xl border border-dashed p-8 text-center text-sm text-muted-foreground">
             No hay usuarios para mostrar.
           </div>
         ) : null}
@@ -102,7 +102,7 @@ export function UsersTable() {
             <div className="overflow-hidden rounded-xl border">
               <Table>
                 <TableHeader>
-                  <TableRow className="bg-slate-50/50">
+                  <TableRow className="bg-muted/40">
                     <TableHead>Nombre</TableHead>
                     <TableHead>Email</TableHead>
                     <TableHead>Rol</TableHead>
@@ -111,9 +111,9 @@ export function UsersTable() {
                 </TableHeader>
                 <TableBody>
                   {users.map((user) => (
-                    <TableRow key={user.id} className="hover:bg-slate-50/50">
+                    <TableRow key={user.id} className="hover:bg-muted/40">
                       <TableCell className="font-medium">{user.firstName} {user.lastName}</TableCell>
-                      <TableCell className="text-sm text-slate-600">{user.email}</TableCell>
+                      <TableCell className="text-sm text-muted-foreground">{user.email}</TableCell>
                       <TableCell>
                         <Badge variant="secondary">{ROLE_LABELS[user.role] ?? user.role}</Badge>
                       </TableCell>
@@ -129,7 +129,7 @@ export function UsersTable() {
             </div>
 
             {totalPages > 1 ? (
-              <div className="flex items-center justify-between text-sm text-slate-500">
+              <div className="flex items-center justify-between text-sm text-muted-foreground">
                 <span>
                   {total} usuario{total !== 1 ? "s" : ""} &mdash; página {page} de {totalPages}
                 </span>

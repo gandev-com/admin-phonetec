@@ -19,7 +19,7 @@ export const STATUS_LABELS: Record<ReportStatus, string> = {
 };
 
 const STATUS_CLASSES: Record<ReportStatus, string> = {
-  RECEIVED: "bg-slate-100 text-slate-700 border-slate-200",
+  RECEIVED: "bg-muted text-muted-foreground border-border",
   IN_DIAGNOSIS: "bg-blue-100 text-blue-800 border-blue-200",
   BUDGET_SENT: "bg-cyan-100 text-cyan-800 border-cyan-200",
   BUDGET_ACCEPTED: "bg-teal-100 text-teal-800 border-teal-200",

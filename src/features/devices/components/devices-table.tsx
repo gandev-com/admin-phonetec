@@ -41,8 +41,8 @@ export function DevicesTable({ customerId }: DevicesTableProps) {
   const { data: brands = [] } = useBrands();
 
   const devices: Device[] = data?.data ?? [];
-  const total = data?.total ?? 0;
-  const totalPages = data ? Math.ceil(data.total / (data.limit || 20)) : 1;
+  const total = data?.meta.total ?? 0;
+  const totalPages = data?.meta.totalPages ?? 1;
 
   return (
     <div className="space-y-4">

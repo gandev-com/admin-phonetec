@@ -42,7 +42,7 @@ export function AppHeader() {
   const fullName = user ? `${user.firstName} ${user.lastName}` : "Usuario";
 
   return (
-    <header className="sticky top-0 z-30 flex h-16 items-center justify-between border-b bg-white/90 px-4 backdrop-blur md:px-6">
+    <header className="sticky top-0 z-30 flex h-16 items-center justify-between border-b bg-background/90 px-4 backdrop-blur md:px-6">
       <div className="flex items-center gap-2">
         <Sheet>
           <SheetTrigger
@@ -60,7 +60,7 @@ export function AppHeader() {
           </SheetContent>
         </Sheet>
 
-        <h2 className="text-sm font-medium text-slate-600">PhoneTec Workspace</h2>
+        <h2 className="text-sm font-medium text-muted-foreground">PhoneTec Workspace</h2>
       </div>
 
       <DropdownMenu>
@@ -70,7 +70,7 @@ export function AppHeader() {
               <Avatar className="h-8 w-8">
                 <AvatarFallback>{initialsFromName(fullName) || "U"}</AvatarFallback>
               </Avatar>
-              <span className="hidden text-sm font-medium text-slate-700 sm:inline">{fullName}</span>
+              <span className="hidden text-sm font-medium text-foreground sm:inline">{fullName}</span>
             </Button>
           }
         />

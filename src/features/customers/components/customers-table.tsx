@@ -80,7 +80,7 @@ export function CustomersTable() {
           ) : null}
 
           {!customersQuery.isPending && !customersQuery.isError && customers.length === 0 ? (
-            <div className="rounded-xl border border-dashed p-8 text-center text-sm text-slate-500">
+            <div className="rounded-xl border border-dashed p-8 text-center text-sm text-muted-foreground">
               No hay clientes para mostrar.
             </div>
           ) : null}
@@ -90,7 +90,7 @@ export function CustomersTable() {
               <div className="overflow-hidden rounded-xl border">
                 <Table>
                   <TableHeader>
-                    <TableRow className="bg-slate-50/50">
+                    <TableRow className="bg-muted/40">
                       <TableHead>Cliente</TableHead>
                       <TableHead>Documento</TableHead>
                       <TableHead>Teléfono</TableHead>
@@ -101,31 +101,31 @@ export function CustomersTable() {
                   </TableHeader>
                   <TableBody>
                     {customers.map((customer) => (
-                      <TableRow key={customer.id} className="hover:bg-slate-50/50">
+                      <TableRow key={customer.id} className="hover:bg-muted/40">
                         <TableCell>
                           <div className="flex items-center gap-3">
                             <Avatar className="h-8 w-8 shrink-0">
-                              <AvatarFallback className="bg-slate-100 text-xs font-medium text-slate-600">
+                              <AvatarFallback className="bg-muted text-xs font-medium text-muted-foreground">
                                 {getInitials(customer.firstName, customer.lastName)}
                               </AvatarFallback>
                             </Avatar>
                             <div className="min-w-0">
-                              <p className="truncate text-sm font-medium text-slate-900">
+                              <p className="truncate text-sm font-medium text-foreground">
                                 {customer.firstName} {customer.lastName}
                                 {customer.secondLastName ? ` ${customer.secondLastName}` : ""}
                               </p>
                               {customer.email ? (
-                                <p className="truncate text-xs text-slate-500">{customer.email}</p>
+                                <p className="truncate text-xs text-muted-foreground">{customer.email}</p>
                               ) : null}
                             </div>
                           </div>
                         </TableCell>
-                        <TableCell className="text-sm text-slate-600">
-                          <span className="text-xs font-medium text-slate-400">{customer.documentType} </span>
+                        <TableCell className="text-sm text-foreground">
+                          <span className="text-xs font-medium text-muted-foreground">{customer.documentType} </span>
                           {customer.document}
                         </TableCell>
-                        <TableCell className="text-sm text-slate-600">{customer.phone1}</TableCell>
-                        <TableCell className="text-sm text-slate-500">
+                        <TableCell className="text-sm text-foreground">{customer.phone1}</TableCell>
+                        <TableCell className="text-sm text-muted-foreground">
                           {[customer.city, customer.province].filter(Boolean).join(", ") || "—"}
                         </TableCell>
                         <TableCell>
@@ -136,7 +136,7 @@ export function CustomersTable() {
                         <TableCell>
                           <Link
                             href={`/customers/${customer.id}`}
-                            className="inline-flex h-8 w-8 items-center justify-center rounded-lg text-slate-500 hover:bg-slate-100 hover:text-slate-900"
+                            className="inline-flex h-8 w-8 items-center justify-center rounded-lg text-muted-foreground hover:bg-muted hover:text-foreground"
                           >
                             <Eye className="h-4 w-4" />
                           </Link>
@@ -147,7 +147,7 @@ export function CustomersTable() {
                 </Table>
               </div>
 
-              <div className="flex items-center justify-between text-sm text-slate-500">
+              <div className="flex items-center justify-between text-sm text-muted-foreground">
                 <span>
                   {total} cliente{total !== 1 ? "s" : ""} &mdash; página {page} de {totalPages}
                 </span>
