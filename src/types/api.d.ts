@@ -352,12 +352,47 @@ export interface paths {
         get: operations["DevicesController_findOne"];
         put?: never;
         post?: never;
-        /** Eliminar dispositivo */
+        /** Eliminar dispositivo (solo ADMIN) */
         delete: operations["DevicesController_remove"];
         options?: never;
         head?: never;
         /** Actualizar dispositivo */
         patch: operations["DevicesController_update"];
+        trace?: never;
+    };
+    "/devices/{id}/images": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Listar imágenes del dispositivo */
+        get: operations["DevicesController_getImages"];
+        put?: never;
+        /** Subir imagen al dispositivo */
+        post: operations["DevicesController_uploadImage"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/devices/{id}/images/{imageId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        /** Eliminar imagen del dispositivo */
+        delete: operations["DevicesController_deleteImage"];
+        options?: never;
+        head?: never;
+        patch?: never;
         trace?: never;
     };
     "/reports": {
@@ -1398,6 +1433,75 @@ export interface operations {
                 content: {
                     "application/json": Record<string, never>;
                 };
+            };
+        };
+    };
+    DevicesController_getImages: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    DevicesController_uploadImage: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "multipart/form-data": {
+                    /** Format: binary */
+                    file: string;
+                    /** @enum {string} */
+                    type: "FRONT" | "BACK" | "SIDE" | "DAMAGE" | "SCREEN" | "OTHER";
+                    description?: string;
+                    order?: number;
+                };
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    DevicesController_deleteImage: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+                imageId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
             };
         };
     };

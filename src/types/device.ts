@@ -98,3 +98,24 @@ export interface BrandListParams {
   search?: string;
   isActive?: boolean;
 }
+
+// ─── Device Images ─────────────────────────────────────────────────────────────
+
+export type DeviceImageType = "FRONT" | "BACK" | "SIDE" | "SCREEN" | "DAMAGE" | "OTHER";
+
+export interface DeviceImage {
+  id: string;
+  deviceId: string;
+  url: string;
+  type: DeviceImageType;
+  description?: string | null;
+  order: number;
+  createdAt: string;
+}
+
+export interface UploadDeviceImageDto {
+  file: File;
+  type: DeviceImageType;
+  description?: string;
+  order: number;
+}

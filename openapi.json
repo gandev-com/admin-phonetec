@@ -983,7 +983,137 @@
             "bearer": []
           }
         ],
-        "summary": "Eliminar dispositivo",
+        "summary": "Eliminar dispositivo (solo ADMIN)",
+        "tags": [
+          "Dispositivos"
+        ]
+      }
+    },
+    "/devices/{id}/images": {
+      "get": {
+        "operationId": "DevicesController_getImages",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Listar imágenes del dispositivo",
+        "tags": [
+          "Dispositivos"
+        ]
+      },
+      "post": {
+        "operationId": "DevicesController_uploadImage",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "file",
+                  "type"
+                ],
+                "properties": {
+                  "file": {
+                    "type": "string",
+                    "format": "binary"
+                  },
+                  "type": {
+                    "type": "string",
+                    "enum": [
+                      "FRONT",
+                      "BACK",
+                      "SIDE",
+                      "DAMAGE",
+                      "SCREEN",
+                      "OTHER"
+                    ]
+                  },
+                  "description": {
+                    "type": "string"
+                  },
+                  "order": {
+                    "type": "number"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Subir imagen al dispositivo",
+        "tags": [
+          "Dispositivos"
+        ]
+      }
+    },
+    "/devices/{id}/images/{imageId}": {
+      "delete": {
+        "operationId": "DevicesController_deleteImage",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "imageId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Eliminar imagen del dispositivo",
         "tags": [
           "Dispositivos"
         ]
