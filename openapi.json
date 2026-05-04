@@ -127,7 +127,52 @@
     "/users": {
       "get": {
         "operationId": "UsersController_findAll",
-        "parameters": [],
+        "parameters": [
+          {
+            "name": "search",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "role",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "$ref": "#/components/schemas/Object"
+            }
+          },
+          {
+            "name": "isActive",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "boolean"
+            }
+          },
+          {
+            "name": "page",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "minimum": 1,
+              "default": 1,
+              "type": "number"
+            }
+          },
+          {
+            "name": "limit",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "minimum": 1,
+              "default": 20,
+              "type": "number"
+            }
+          }
+        ],
         "responses": {
           "200": {
             "description": ""
@@ -207,6 +252,35 @@
             "application/json": {
               "schema": {
                 "$ref": "#/components/schemas/UpdateUserDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "Usuarios"
+        ]
+      }
+    },
+    "/users/me/password": {
+      "patch": {
+        "operationId": "UsersController_changeMyPassword",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ChangePasswordDto"
               }
             }
           }
@@ -346,7 +420,15 @@
             "in": "query",
             "schema": {
               "default": "createdAt",
-              "type": "string"
+              "type": "string",
+              "enum": [
+                "createdAt",
+                "firstName",
+                "lastName",
+                "document",
+                "city",
+                "email"
+              ]
             }
           },
           {
@@ -1217,7 +1299,16 @@
             "in": "query",
             "schema": {
               "default": "receptionDate",
-              "type": "string"
+              "type": "string",
+              "enum": [
+                "createdAt",
+                "receptionDate",
+                "estimatedDeliveryDate",
+                "priority",
+                "orderNumber",
+                "total",
+                "currentStatus"
+              ]
             }
           },
           {
@@ -1845,7 +1936,76 @@
     "/activity-log": {
       "get": {
         "operationId": "ActivityLogController_findAll",
-        "parameters": [],
+        "parameters": [
+          {
+            "name": "userId",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "entity",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "entityId",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "action",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "dateFrom",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "dateTo",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "page",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "minimum": 1,
+              "default": 1,
+              "type": "number"
+            }
+          },
+          {
+            "name": "limit",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "minimum": 1,
+              "default": 50,
+              "type": "number"
+            }
+          }
+        ],
         "responses": {
           "200": {
             "description": ""
@@ -1944,9 +2104,43 @@
           "firstName"
         ]
       },
-      "UpdateUserDto": {
+      "Object": {
         "type": "object",
         "properties": {}
+      },
+      "ChangePasswordDto": {
+        "type": "object",
+        "properties": {
+          "currentPassword": {
+            "type": "string"
+          },
+          "newPassword": {
+            "type": "string",
+            "minLength": 8
+          }
+        },
+        "required": [
+          "currentPassword",
+          "newPassword"
+        ]
+      },
+      "UpdateUserDto": {
+        "type": "object",
+        "properties": {
+          "firstName": {
+            "type": "string",
+            "minLength": 2
+          },
+          "lastName": {
+            "type": "string"
+          },
+          "role": {
+            "type": "object"
+          },
+          "isActive": {
+            "type": "boolean"
+          }
+        }
       },
       "CreateCustomerDto": {
         "type": "object",
@@ -2014,10 +2208,6 @@
           "lastName",
           "phone1"
         ]
-      },
-      "Object": {
-        "type": "object",
-        "properties": {}
       },
       "UpdateCustomerDto": {
         "type": "object",

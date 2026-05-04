@@ -148,6 +148,22 @@ export interface paths {
         patch: operations["UsersController_update"];
         trace?: never;
     };
+    "/users/me/password": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch: operations["UsersController_changeMyPassword"];
+        trace?: never;
+    };
     "/users/{id}/deactivate": {
         parameters: {
             query?: never;
@@ -640,7 +656,17 @@ export interface components {
             lastName?: string;
             role?: Record<string, never>;
         };
-        UpdateUserDto: Record<string, never>;
+        Object: Record<string, never>;
+        ChangePasswordDto: {
+            currentPassword: string;
+            newPassword: string;
+        };
+        UpdateUserDto: {
+            firstName?: string;
+            lastName?: string;
+            role?: Record<string, never>;
+            isActive?: boolean;
+        };
         CreateCustomerDto: {
             /** @default DNI */
             documentType: Record<string, never>;
@@ -660,7 +686,6 @@ export interface components {
             dataConsent: boolean;
             internalNotes?: string;
         };
-        Object: Record<string, never>;
         UpdateCustomerDto: Record<string, never>;
         CreateBrandDto: {
             name: string;
@@ -913,7 +938,13 @@ export interface operations {
     };
     UsersController_findAll: {
         parameters: {
-            query?: never;
+            query?: {
+                search?: string;
+                role?: components["schemas"]["Object"];
+                isActive?: boolean;
+                page?: number;
+                limit?: number;
+            };
             header?: never;
             path?: never;
             cookie?: never;
@@ -987,6 +1018,27 @@ export interface operations {
             };
         };
     };
+    UsersController_changeMyPassword: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ChangePasswordDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
     UsersController_deactivate: {
         parameters: {
             query?: never;
@@ -1015,7 +1067,7 @@ export interface operations {
                 province?: string;
                 page?: number;
                 limit?: number;
-                sortBy?: string;
+                sortBy?: "createdAt" | "firstName" | "lastName" | "document" | "city" | "email";
                 order?: "asc" | "desc";
             };
             header?: never;
@@ -1519,7 +1571,7 @@ export interface operations {
                 isUrgent?: boolean;
                 dateFrom?: string;
                 dateTo?: string;
-                sortBy?: string;
+                sortBy?: "createdAt" | "receptionDate" | "estimatedDeliveryDate" | "priority" | "orderNumber" | "total" | "currentStatus";
                 order?: "asc" | "desc";
                 page?: number;
                 limit?: number;
@@ -1889,7 +1941,16 @@ export interface operations {
     };
     ActivityLogController_findAll: {
         parameters: {
-            query?: never;
+            query?: {
+                userId?: string;
+                entity?: string;
+                entityId?: string;
+                action?: string;
+                dateFrom?: string;
+                dateTo?: string;
+                page?: number;
+                limit?: number;
+            };
             header?: never;
             path?: never;
             cookie?: never;

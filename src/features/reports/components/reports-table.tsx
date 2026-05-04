@@ -12,7 +12,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { StatusBadge, STATUS_LABELS } from "@/components/reports/status-badge";
 import { reportsApi } from "@/lib/api/reports";
-import type { PaymentStatus, Report, ReportStatus } from "@/types/report";
+import type { PaymentStatus, ReportStatus } from "@/types/report";
 
 const PAGE_SIZE = 20;
 
@@ -32,41 +32,11 @@ const REPORT_TYPE_LABELS: Record<string, string> = {
 
 const ALL_STATUSES = Object.keys(STATUS_LABELS) as ReportStatus[];
 
-// Statuses that are still open/active (device not yet delivered/closed)
-const ACTIVE_STATUSES = new Set<ReportStatus>([
-  "RECEIVED",
-  "IN_DIAGNOSIS",
-  "BUDGET_SENT",
-  "BUDGET_ACCEPTED",
-  "BUDGET_REJECTED",
-  "WAITING_PARTS",
-  "IN_REPAIR",
-  "TESTING",
-  "REPAIRED",
-  "READY_FOR_PICKUP",
-]);
-
-function sortReportsByPriority(reports: Report[]) {
-  return [...reports].sort((a, b) => {
-    const aActive = ACTIVE_STATUSES.has(a.currentStatus);
-    const bActive = ACTIVE_STATUSES.has(b.currentStatus);
-    if (aActive && !bActive) return -1;
-    if (!aActive && bActive) return 1;
-    if (aActive && bActive) {
-      // Oldest reception first — they've been waiting longest
-      const aDate = a.receptionDate ?? a.createdAt;
-      const bDate = b.receptionDate ?? b.createdAt;
-      return new Date(aDate).getTime() - new Date(bDate).getTime();
-    }
-    // Both completed — most recently updated first
-    return new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime();
-  });
-}
-
 export function ReportsTable() {
   const [searchInput, setSearchInput] = useState("");
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState<ReportStatus | "">("");
+  const [urgentOnly, setUrgentOnly] = useState(false);
   const [page, setPage] = useState(1);
 
   useEffect(() => {
@@ -78,20 +48,20 @@ export function ReportsTable() {
   }, [searchInput]);
 
   const reportsQuery = useQuery({
-    queryKey: ["reports", { search, status: statusFilter, page }],
+    queryKey: ["reports", { search, status: statusFilter, urgentOnly, page }],
     queryFn: () =>
       reportsApi.list({
         search: search || undefined,
         currentStatus: statusFilter || undefined,
+        isUrgent: urgentOnly || undefined,
         page,
         limit: PAGE_SIZE,
-        sortBy: "updatedAt",
+        sortBy: "receptionDate",
         order: "desc",
       }),
   });
 
-  const rawReports = reportsQuery.data?.data ?? [];
-  const reports = sortReportsByPriority(rawReports);
+  const reports = reportsQuery.data?.data ?? [];
   const total = reportsQuery.data?.total ?? 0;
   const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE));
 
@@ -110,6 +80,13 @@ export function ReportsTable() {
               <option key={s} value={s}>{STATUS_LABELS[s]}</option>
             ))}
           </select>
+          <Button
+            variant={urgentOnly ? "default" : "outline"}
+            size="sm"
+            onClick={() => { setUrgentOnly((v) => !v); setPage(1); }}
+          >
+            ⚑ Urgentes
+          </Button>
           <Input
             value={searchInput}
             onChange={(e) => setSearchInput(e.target.value)}

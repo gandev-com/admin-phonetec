@@ -39,4 +39,15 @@ export const brandsApi = {
     const client = AUTH_DISABLED ? authlessClient : apiClient;
     await client.delete(`/brands/${id}`);
   },
+
+  async createModel(data: { name: string; brandId: string }): Promise<DeviceModel> {
+    const client = AUTH_DISABLED ? authlessClient : apiClient;
+    const response = await client.post<DeviceModel>("/brands/models", data);
+    return response.data;
+  },
+
+  async removeModel(modelId: number | string): Promise<void> {
+    const client = AUTH_DISABLED ? authlessClient : apiClient;
+    await client.delete(`/brands/models/${modelId}`);
+  },
 };

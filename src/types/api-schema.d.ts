@@ -148,6 +148,22 @@ export interface paths {
         patch: operations["UsersController_update"];
         trace?: never;
     };
+    "/users/me/password": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch: operations["UsersController_changeMyPassword"];
+        trace?: never;
+    };
     "/users/{id}/deactivate": {
         parameters: {
             query?: never;
@@ -245,7 +261,8 @@ export interface paths {
         /** Listar marcas */
         get: operations["BrandsController_findAll"];
         put?: never;
-        post?: never;
+        /** Crear marca */
+        post: operations["BrandsController_create"];
         delete?: never;
         options?: never;
         head?: never;
@@ -263,10 +280,12 @@ export interface paths {
         get: operations["BrandsController_findOne"];
         put?: never;
         post?: never;
-        delete?: never;
+        /** Eliminar marca */
+        delete: operations["BrandsController_remove"];
         options?: never;
         head?: never;
-        patch?: never;
+        /** Actualizar marca */
+        patch: operations["BrandsController_update"];
         trace?: never;
     };
     "/brands/{id}/models": {
@@ -286,6 +305,40 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/brands/models": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Crear modelo de dispositivo */
+        post: operations["BrandsController_createModel"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/brands/models/{modelId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        /** Eliminar modelo de dispositivo */
+        delete: operations["BrandsController_removeModel"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/devices": {
         parameters: {
             query?: never;
@@ -296,7 +349,8 @@ export interface paths {
         /** Listar dispositivos con filtros */
         get: operations["DevicesController_findAll"];
         put?: never;
-        post?: never;
+        /** Registrar nuevo dispositivo */
+        post: operations["DevicesController_create"];
         delete?: never;
         options?: never;
         head?: never;
@@ -314,7 +368,44 @@ export interface paths {
         get: operations["DevicesController_findOne"];
         put?: never;
         post?: never;
+        /** Eliminar dispositivo (solo ADMIN) */
+        delete: operations["DevicesController_remove"];
+        options?: never;
+        head?: never;
+        /** Actualizar dispositivo */
+        patch: operations["DevicesController_update"];
+        trace?: never;
+    };
+    "/devices/{id}/images": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Listar imágenes del dispositivo */
+        get: operations["DevicesController_getImages"];
+        put?: never;
+        /** Subir imagen al dispositivo */
+        post: operations["DevicesController_uploadImage"];
         delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/devices/{id}/images/{imageId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        /** Eliminar imagen del dispositivo */
+        delete: operations["DevicesController_deleteImage"];
         options?: never;
         head?: never;
         patch?: never;
@@ -330,7 +421,8 @@ export interface paths {
         /** Listar informes/órdenes con filtros */
         get: operations["ReportsController_findAll"];
         put?: never;
-        post?: never;
+        /** Crear nuevo informe/orden de reparación */
+        post: operations["ReportsController_create"];
         delete?: never;
         options?: never;
         head?: never;
@@ -382,10 +474,12 @@ export interface paths {
         get: operations["ReportsController_findOne"];
         put?: never;
         post?: never;
-        delete?: never;
+        /** Eliminar informe */
+        delete: operations["ReportsController_remove"];
         options?: never;
         head?: never;
-        patch?: never;
+        /** Actualizar informe (estado, diagnóstico, costes...) */
+        patch: operations["ReportsController_update"];
         trace?: never;
     };
     "/parts": {
@@ -398,7 +492,8 @@ export interface paths {
         /** Listar repuestos con filtros */
         get: operations["PartsController_findAll"];
         put?: never;
-        post?: never;
+        /** Crear repuesto */
+        post: operations["PartsController_create"];
         delete?: never;
         options?: never;
         head?: never;
@@ -450,10 +545,12 @@ export interface paths {
         get: operations["PartsController_findOne"];
         put?: never;
         post?: never;
-        delete?: never;
+        /** Eliminar repuesto */
+        delete: operations["PartsController_remove"];
         options?: never;
         head?: never;
-        patch?: never;
+        /** Actualizar repuesto */
+        patch: operations["PartsController_update"];
         trace?: never;
     };
     "/settings": {
@@ -504,7 +601,8 @@ export interface paths {
         delete?: never;
         options?: never;
         head?: never;
-        patch?: never;
+        /** Actualizar valor de una configuración (solo ADMIN) */
+        patch: operations["SettingsController_update"];
         trace?: never;
     };
     "/activity-log": {
@@ -558,7 +656,17 @@ export interface components {
             lastName?: string;
             role?: Record<string, never>;
         };
-        UpdateUserDto: Record<string, never>;
+        Object: Record<string, never>;
+        ChangePasswordDto: {
+            currentPassword: string;
+            newPassword: string;
+        };
+        UpdateUserDto: {
+            firstName?: string;
+            lastName?: string;
+            role?: Record<string, never>;
+            isActive?: boolean;
+        };
         CreateCustomerDto: {
             /** @default DNI */
             documentType: Record<string, never>;
@@ -578,8 +686,133 @@ export interface components {
             dataConsent: boolean;
             internalNotes?: string;
         };
-        Object: Record<string, never>;
         UpdateCustomerDto: Record<string, never>;
+        CreateBrandDto: {
+            name: string;
+            logo?: string;
+            /** @default true */
+            isActive: boolean;
+            /** @default 0 */
+            order: number;
+        };
+        CreateDeviceModelDto: {
+            name: string;
+            brandId: string;
+        };
+        UpdateBrandDto: Record<string, never>;
+        CreateDeviceDto: {
+            /** Format: uuid */
+            customerId: string;
+            /** Format: uuid */
+            brandId: string;
+            model: string;
+            imeiIn?: string;
+            imeiOut?: string;
+            serialNumber?: string;
+            /** @default false */
+            hasBackCover: boolean;
+            /** @default false */
+            hasBattery: boolean;
+            /** @default false */
+            hasSimCard: boolean;
+            /** @default false */
+            hasSdCard: boolean;
+            /** @default false */
+            hasCharger: boolean;
+            otherAccessories?: string;
+            screenCondition?: string;
+            caseCondition?: string;
+            dents?: string;
+            scratches?: string;
+            /** @default false */
+            hasPattern: boolean;
+            /** @default false */
+            hasPin: boolean;
+            /** @default false */
+            hasFingerprint: boolean;
+            /** @default false */
+            patternUnlocked: boolean;
+        };
+        UpdateDeviceDto: Record<string, never>;
+        CreateReportDto: {
+            reportType: Record<string, never>;
+            /** Format: uuid */
+            customerId: string;
+            /** Format: uuid */
+            deviceId: string;
+            /** Format: uuid */
+            technicianId?: string;
+            receptionDate?: string;
+            estimatedDeliveryDate?: string;
+            reportedIssue: string;
+            entryCondition?: string;
+            initialBudget?: number;
+            /** @default NO_WARRANTY */
+            warrantyType: Record<string, never>;
+            /** @default 0 */
+            warrantyDays: number;
+            /** @default NORMAL */
+            priority: Record<string, never>;
+            /** @default false */
+            isUrgent: boolean;
+            internalNotes?: string;
+            customerNotes?: string;
+            paymentMethod?: string;
+        };
+        UpdateReportDto: {
+            /** Format: uuid */
+            technicianId?: string;
+            estimatedDeliveryDate?: string;
+            repairDate?: string;
+            deliveryDate?: string;
+            cancellationDate?: string;
+            reportedIssue?: string;
+            technicalDiagnosis?: string;
+            repairPerformed?: string;
+            currentStatus?: Record<string, never>;
+            initialBudget?: number;
+            finalBudget?: number;
+            partsCost?: number;
+            laborCost?: number;
+            discount?: number;
+            total?: number;
+            warrantyType?: Record<string, never>;
+            warrantyDays?: number;
+            warrantyEndDate?: string;
+            entryCondition?: string;
+            exitCondition?: Record<string, never>;
+            paymentStatus?: Record<string, never>;
+            paymentMethod?: string;
+            priority?: Record<string, never>;
+            isUrgent?: boolean;
+            internalNotes?: string;
+            customerNotes?: string;
+        };
+        CreatePartDto: {
+            code: string;
+            name: string;
+            description?: string;
+            category: string;
+            /** @default [] */
+            brands: string[];
+            /** @default [] */
+            models: string[];
+            /** @default 0 */
+            stock: number;
+            /** @default 5 */
+            minStock: number;
+            location?: string;
+            purchasePrice: number;
+            salePrice: number;
+            supplier?: string;
+            supplierReference?: string;
+            /** @default true */
+            isActive: boolean;
+        };
+        UpdatePartDto: Record<string, never>;
+        UpdateSettingDto: {
+            value: string;
+        };
     };
     responses: never;
     parameters: never;
@@ -705,7 +938,13 @@ export interface operations {
     };
     UsersController_findAll: {
         parameters: {
-            query?: never;
+            query?: {
+                search?: string;
+                role?: components["schemas"]["Object"];
+                isActive?: boolean;
+                page?: number;
+                limit?: number;
+            };
             header?: never;
             path?: never;
             cookie?: never;
@@ -779,6 +1018,27 @@ export interface operations {
             };
         };
     };
+    UsersController_changeMyPassword: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ChangePasswordDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
     UsersController_deactivate: {
         parameters: {
             query?: never;
@@ -807,8 +1067,8 @@ export interface operations {
                 province?: string;
                 page?: number;
                 limit?: number;
-                sortBy?: string;
-                order?: components["schemas"]["Object"];
+                sortBy?: "createdAt" | "firstName" | "lastName" | "document" | "city" | "email";
+                order?: "asc" | "desc";
             };
             header?: never;
             path?: never;
@@ -970,6 +1230,29 @@ export interface operations {
             };
         };
     };
+    BrandsController_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CreateBrandDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>;
+                };
+            };
+        };
+    };
     BrandsController_findOne: {
         parameters: {
             query?: never;
@@ -991,12 +1274,96 @@ export interface operations {
             };
         };
     };
+    BrandsController_remove: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    BrandsController_update: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["UpdateBrandDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>;
+                };
+            };
+        };
+    };
     BrandsController_findModels: {
         parameters: {
             query?: never;
             header?: never;
             path: {
                 id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    BrandsController_createModel: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CreateDeviceModelDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    BrandsController_removeModel: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                modelId: string;
             };
             cookie?: never;
         };
@@ -1033,6 +1400,29 @@ export interface operations {
             };
         };
     };
+    DevicesController_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CreateDeviceDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>;
+                };
+            };
+        };
+    };
     DevicesController_findOne: {
         parameters: {
             query?: never;
@@ -1054,6 +1444,119 @@ export interface operations {
             };
         };
     };
+    DevicesController_remove: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    DevicesController_update: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["UpdateDeviceDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>;
+                };
+            };
+        };
+    };
+    DevicesController_getImages: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    DevicesController_uploadImage: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "multipart/form-data": {
+                    /** Format: binary */
+                    file: string;
+                    /** @enum {string} */
+                    type: "FRONT" | "BACK" | "SIDE" | "DAMAGE" | "SCREEN" | "OTHER";
+                    description?: string;
+                    order?: number;
+                };
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    DevicesController_deleteImage: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+                imageId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
     ReportsController_findAll: {
         parameters: {
             query?: {
@@ -1068,8 +1571,8 @@ export interface operations {
                 isUrgent?: boolean;
                 dateFrom?: string;
                 dateTo?: string;
-                sortBy?: string;
-                order?: components["schemas"]["Object"];
+                sortBy?: "createdAt" | "receptionDate" | "estimatedDeliveryDate" | "priority" | "orderNumber" | "total" | "currentStatus";
+                order?: "asc" | "desc";
                 page?: number;
                 limit?: number;
             };
@@ -1084,6 +1587,29 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content?: never;
+            };
+        };
+    };
+    ReportsController_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CreateReportDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>;
+                };
             };
         };
     };
@@ -1146,6 +1672,50 @@ export interface operations {
             };
         };
     };
+    ReportsController_remove: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    ReportsController_update: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["UpdateReportDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>;
+                };
+            };
+        };
+    };
     PartsController_findAll: {
         parameters: {
             query?: {
@@ -1164,6 +1734,27 @@ export interface operations {
         requestBody?: never;
         responses: {
             200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    PartsController_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CreatePartDto"];
+            };
+        };
+        responses: {
+            201: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -1228,6 +1819,48 @@ export interface operations {
             };
         };
     };
+    PartsController_remove: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    PartsController_update: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["UpdatePartDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
     SettingsController_findAll: {
         parameters: {
             query?: {
@@ -1283,9 +1916,41 @@ export interface operations {
             };
         };
     };
-    ActivityLogController_findAll: {
+    SettingsController_update: {
         parameters: {
             query?: never;
+            header?: never;
+            path: {
+                key: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["UpdateSettingDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    ActivityLogController_findAll: {
+        parameters: {
+            query?: {
+                userId?: string;
+                entity?: string;
+                entityId?: string;
+                action?: string;
+                dateFrom?: string;
+                dateTo?: string;
+                page?: number;
+                limit?: number;
+            };
             header?: never;
             path?: never;
             cookie?: never;
