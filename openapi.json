@@ -587,6 +587,522 @@
         ]
       }
     },
+    "/customers/{id}/reports": {
+      "post": {
+        "operationId": "CustomersController_createReport",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateReportDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            }
+          }
+        },
+        "summary": "Crear orden directamente desde el perfil del cliente",
+        "tags": [
+          "Clientes"
+        ]
+      }
+    },
+    "/reports": {
+      "get": {
+        "operationId": "ReportsController_findAll",
+        "parameters": [
+          {
+            "name": "search",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "customerId",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "deviceId",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "technicianId",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "reportType",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "$ref": "#/components/schemas/Object"
+            }
+          },
+          {
+            "name": "currentStatus",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "$ref": "#/components/schemas/Object"
+            }
+          },
+          {
+            "name": "paymentStatus",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "$ref": "#/components/schemas/Object"
+            }
+          },
+          {
+            "name": "priority",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "$ref": "#/components/schemas/Object"
+            }
+          },
+          {
+            "name": "isUrgent",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "boolean"
+            }
+          },
+          {
+            "name": "dateFrom",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "dateTo",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "sortBy",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "default": "receptionDate",
+              "type": "string",
+              "enum": [
+                "createdAt",
+                "receptionDate",
+                "estimatedDeliveryDate",
+                "priority",
+                "orderNumber",
+                "total",
+                "currentStatus"
+              ]
+            }
+          },
+          {
+            "name": "order",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "default": "desc",
+              "type": "string",
+              "enum": [
+                "asc",
+                "desc"
+              ]
+            }
+          },
+          {
+            "name": "activeFirst",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "boolean"
+            }
+          },
+          {
+            "name": "include",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "page",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "minimum": 1,
+              "default": 1,
+              "type": "number"
+            }
+          },
+          {
+            "name": "limit",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "minimum": 1,
+              "default": 20,
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Listar informes/órdenes con filtros",
+        "tags": [
+          "Informes"
+        ]
+      },
+      "post": {
+        "operationId": "ReportsController_create",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateReportDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Crear nuevo informe/orden de reparación",
+        "tags": [
+          "Informes"
+        ]
+      }
+    },
+    "/reports/stats": {
+      "get": {
+        "operationId": "ReportsController_getStats",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Estadísticas de informes",
+        "tags": [
+          "Informes"
+        ]
+      }
+    },
+    "/reports/order/{orderNumber}": {
+      "get": {
+        "operationId": "ReportsController_findByOrderNumber",
+        "parameters": [
+          {
+            "name": "orderNumber",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Buscar informe por número de orden",
+        "tags": [
+          "Informes"
+        ]
+      }
+    },
+    "/reports/{id}": {
+      "get": {
+        "operationId": "ReportsController_findOne",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Obtener informe completo por ID",
+        "tags": [
+          "Informes"
+        ]
+      },
+      "patch": {
+        "operationId": "ReportsController_update",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateReportDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Actualizar informe (estado, diagnóstico, costes...)",
+        "tags": [
+          "Informes"
+        ]
+      },
+      "delete": {
+        "operationId": "ReportsController_remove",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Eliminar informe",
+        "tags": [
+          "Informes"
+        ]
+      }
+    },
+    "/reports/{id}/ready-for-pickup": {
+      "patch": {
+        "operationId": "ReportsController_markReadyForPickup",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Marcar orden como lista para recogida (READY_FOR_PICKUP)",
+        "tags": [
+          "Informes"
+        ]
+      }
+    },
+    "/reports/{id}/deliver": {
+      "post": {
+        "operationId": "ReportsController_deliverWithConsent",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "file",
+                  "signedBy"
+                ],
+                "properties": {
+                  "file": {
+                    "type": "string",
+                    "format": "binary",
+                    "description": "Documento de consentimiento firmado (PDF, JPEG o PNG)"
+                  },
+                  "signedBy": {
+                    "type": "string",
+                    "description": "Nombre del cliente que firma"
+                  },
+                  "technicianId": {
+                    "type": "string",
+                    "description": "ID del técnico que realiza la entrega (opcional)"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Entregar dispositivo: sube documento firmado y pasa a DELIVERED",
+        "tags": [
+          "Informes"
+        ]
+      }
+    },
     "/brands": {
       "get": {
         "operationId": "BrandsController_findAll",
@@ -1206,380 +1722,6 @@
         "summary": "Eliminar imagen del dispositivo",
         "tags": [
           "Dispositivos"
-        ]
-      }
-    },
-    "/reports": {
-      "get": {
-        "operationId": "ReportsController_findAll",
-        "parameters": [
-          {
-            "name": "search",
-            "required": false,
-            "in": "query",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "customerId",
-            "required": false,
-            "in": "query",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "deviceId",
-            "required": false,
-            "in": "query",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "technicianId",
-            "required": false,
-            "in": "query",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "reportType",
-            "required": false,
-            "in": "query",
-            "schema": {
-              "$ref": "#/components/schemas/Object"
-            }
-          },
-          {
-            "name": "currentStatus",
-            "required": false,
-            "in": "query",
-            "schema": {
-              "$ref": "#/components/schemas/Object"
-            }
-          },
-          {
-            "name": "paymentStatus",
-            "required": false,
-            "in": "query",
-            "schema": {
-              "$ref": "#/components/schemas/Object"
-            }
-          },
-          {
-            "name": "priority",
-            "required": false,
-            "in": "query",
-            "schema": {
-              "$ref": "#/components/schemas/Object"
-            }
-          },
-          {
-            "name": "isUrgent",
-            "required": false,
-            "in": "query",
-            "schema": {
-              "type": "boolean"
-            }
-          },
-          {
-            "name": "dateFrom",
-            "required": false,
-            "in": "query",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "dateTo",
-            "required": false,
-            "in": "query",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "sortBy",
-            "required": false,
-            "in": "query",
-            "schema": {
-              "default": "receptionDate",
-              "type": "string",
-              "enum": [
-                "createdAt",
-                "receptionDate",
-                "estimatedDeliveryDate",
-                "priority",
-                "orderNumber",
-                "total",
-                "currentStatus"
-              ]
-            }
-          },
-          {
-            "name": "order",
-            "required": false,
-            "in": "query",
-            "schema": {
-              "default": "desc",
-              "type": "string",
-              "enum": [
-                "asc",
-                "desc"
-              ]
-            }
-          },
-          {
-            "name": "activeFirst",
-            "required": false,
-            "in": "query",
-            "schema": {
-              "type": "boolean"
-            }
-          },
-          {
-            "name": "include",
-            "required": false,
-            "in": "query",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "page",
-            "required": false,
-            "in": "query",
-            "schema": {
-              "minimum": 1,
-              "default": 1,
-              "type": "number"
-            }
-          },
-          {
-            "name": "limit",
-            "required": false,
-            "in": "query",
-            "schema": {
-              "minimum": 1,
-              "default": 20,
-              "type": "number"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": ""
-          }
-        },
-        "security": [
-          {
-            "bearer": []
-          }
-        ],
-        "summary": "Listar informes/órdenes con filtros",
-        "tags": [
-          "Informes"
-        ]
-      },
-      "post": {
-        "operationId": "ReportsController_create",
-        "parameters": [],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/CreateReportDto"
-              }
-            }
-          }
-        },
-        "responses": {
-          "201": {
-            "description": "",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object"
-                }
-              }
-            }
-          }
-        },
-        "security": [
-          {
-            "bearer": []
-          }
-        ],
-        "summary": "Crear nuevo informe/orden de reparación",
-        "tags": [
-          "Informes"
-        ]
-      }
-    },
-    "/reports/stats": {
-      "get": {
-        "operationId": "ReportsController_getStats",
-        "parameters": [],
-        "responses": {
-          "200": {
-            "description": ""
-          }
-        },
-        "security": [
-          {
-            "bearer": []
-          }
-        ],
-        "summary": "Estadísticas de informes",
-        "tags": [
-          "Informes"
-        ]
-      }
-    },
-    "/reports/order/{orderNumber}": {
-      "get": {
-        "operationId": "ReportsController_findByOrderNumber",
-        "parameters": [
-          {
-            "name": "orderNumber",
-            "required": true,
-            "in": "path",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object"
-                }
-              }
-            }
-          }
-        },
-        "security": [
-          {
-            "bearer": []
-          }
-        ],
-        "summary": "Buscar informe por número de orden",
-        "tags": [
-          "Informes"
-        ]
-      }
-    },
-    "/reports/{id}": {
-      "get": {
-        "operationId": "ReportsController_findOne",
-        "parameters": [
-          {
-            "name": "id",
-            "required": true,
-            "in": "path",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object"
-                }
-              }
-            }
-          }
-        },
-        "security": [
-          {
-            "bearer": []
-          }
-        ],
-        "summary": "Obtener informe completo por ID",
-        "tags": [
-          "Informes"
-        ]
-      },
-      "patch": {
-        "operationId": "ReportsController_update",
-        "parameters": [
-          {
-            "name": "id",
-            "required": true,
-            "in": "path",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/UpdateReportDto"
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object"
-                }
-              }
-            }
-          }
-        },
-        "security": [
-          {
-            "bearer": []
-          }
-        ],
-        "summary": "Actualizar informe (estado, diagnóstico, costes...)",
-        "tags": [
-          "Informes"
-        ]
-      },
-      "delete": {
-        "operationId": "ReportsController_remove",
-        "parameters": [
-          {
-            "name": "id",
-            "required": true,
-            "in": "path",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": ""
-          }
-        },
-        "security": [
-          {
-            "bearer": []
-          }
-        ],
-        "summary": "Eliminar informe",
-        "tags": [
-          "Informes"
         ]
       }
     },
@@ -2237,135 +2379,6 @@
         "type": "object",
         "properties": {}
       },
-      "CreateBrandDto": {
-        "type": "object",
-        "properties": {
-          "name": {
-            "type": "string"
-          },
-          "logo": {
-            "type": "string"
-          },
-          "isActive": {
-            "type": "boolean",
-            "default": true
-          },
-          "order": {
-            "type": "number",
-            "default": 0,
-            "minimum": 0
-          }
-        },
-        "required": [
-          "name"
-        ]
-      },
-      "CreateDeviceModelDto": {
-        "type": "object",
-        "properties": {
-          "name": {
-            "type": "string"
-          },
-          "brandId": {
-            "type": "string"
-          }
-        },
-        "required": [
-          "name",
-          "brandId"
-        ]
-      },
-      "UpdateBrandDto": {
-        "type": "object",
-        "properties": {}
-      },
-      "CreateDeviceDto": {
-        "type": "object",
-        "properties": {
-          "customerId": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "brandId": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "model": {
-            "type": "string"
-          },
-          "imeiIn": {
-            "type": "string",
-            "pattern": "^\\d{15}$"
-          },
-          "imeiOut": {
-            "type": "string",
-            "pattern": "^\\d{15}$"
-          },
-          "serialNumber": {
-            "type": "string"
-          },
-          "hasBackCover": {
-            "type": "boolean",
-            "default": false
-          },
-          "hasBattery": {
-            "type": "boolean",
-            "default": false
-          },
-          "hasSimCard": {
-            "type": "boolean",
-            "default": false
-          },
-          "hasSdCard": {
-            "type": "boolean",
-            "default": false
-          },
-          "hasCharger": {
-            "type": "boolean",
-            "default": false
-          },
-          "otherAccessories": {
-            "type": "string"
-          },
-          "screenCondition": {
-            "type": "string"
-          },
-          "caseCondition": {
-            "type": "string"
-          },
-          "dents": {
-            "type": "string"
-          },
-          "scratches": {
-            "type": "string"
-          },
-          "hasPattern": {
-            "type": "boolean",
-            "default": false
-          },
-          "hasPin": {
-            "type": "boolean",
-            "default": false
-          },
-          "hasFingerprint": {
-            "type": "boolean",
-            "default": false
-          },
-          "patternUnlocked": {
-            "type": "boolean",
-            "default": false
-          }
-        },
-        "required": [
-          "customerId",
-          "brandId",
-          "model"
-        ]
-      },
-      "UpdateDeviceDto": {
-        "type": "object",
-        "properties": {}
-      },
       "CreateReportDto": {
         "type": "object",
         "properties": {
@@ -2524,6 +2537,135 @@
             "type": "string"
           }
         }
+      },
+      "CreateBrandDto": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "logo": {
+            "type": "string"
+          },
+          "isActive": {
+            "type": "boolean",
+            "default": true
+          },
+          "order": {
+            "type": "number",
+            "default": 0,
+            "minimum": 0
+          }
+        },
+        "required": [
+          "name"
+        ]
+      },
+      "CreateDeviceModelDto": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "brandId": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "name",
+          "brandId"
+        ]
+      },
+      "UpdateBrandDto": {
+        "type": "object",
+        "properties": {}
+      },
+      "CreateDeviceDto": {
+        "type": "object",
+        "properties": {
+          "customerId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "brandId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "model": {
+            "type": "string"
+          },
+          "imeiIn": {
+            "type": "string",
+            "pattern": "^\\d{15}$"
+          },
+          "imeiOut": {
+            "type": "string",
+            "pattern": "^\\d{15}$"
+          },
+          "serialNumber": {
+            "type": "string"
+          },
+          "hasBackCover": {
+            "type": "boolean",
+            "default": false
+          },
+          "hasBattery": {
+            "type": "boolean",
+            "default": false
+          },
+          "hasSimCard": {
+            "type": "boolean",
+            "default": false
+          },
+          "hasSdCard": {
+            "type": "boolean",
+            "default": false
+          },
+          "hasCharger": {
+            "type": "boolean",
+            "default": false
+          },
+          "otherAccessories": {
+            "type": "string"
+          },
+          "screenCondition": {
+            "type": "string"
+          },
+          "caseCondition": {
+            "type": "string"
+          },
+          "dents": {
+            "type": "string"
+          },
+          "scratches": {
+            "type": "string"
+          },
+          "hasPattern": {
+            "type": "boolean",
+            "default": false
+          },
+          "hasPin": {
+            "type": "boolean",
+            "default": false
+          },
+          "hasFingerprint": {
+            "type": "boolean",
+            "default": false
+          },
+          "patternUnlocked": {
+            "type": "boolean",
+            "default": false
+          }
+        },
+        "required": [
+          "customerId",
+          "brandId",
+          "model"
+        ]
+      },
+      "UpdateDeviceDto": {
+        "type": "object",
+        "properties": {}
       },
       "CreatePartDto": {
         "type": "object",

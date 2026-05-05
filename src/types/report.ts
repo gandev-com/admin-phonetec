@@ -101,9 +101,17 @@ export interface Report {
   device?: Device;
   technician?: User;
   parts?: ReportPart[];
+  consentDocument?: ConsentDocument;
 
   createdAt: string;
   updatedAt: string;
+}
+
+export interface ConsentDocument {
+  id: string;
+  filePath: string;
+  signedBy: string;
+  signedAt: string;
 }
 
 // ─── Stats ────────────────────────────────────────────────────────────────────

@@ -2,13 +2,16 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Building2, ClipboardList, LayoutDashboard, Package, Receipt, Settings, ShieldUser, Smartphone, Users, Wrench } from "lucide-react";
+import { Building2, ClipboardList, Columns3, LayoutDashboard, Package, PackageCheck, Receipt, Settings, ShieldUser, Smartphone, Users, Wrench } from "lucide-react";
 
 import { cn } from "@/lib/utils";
 
 const navigation = [
   { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
+  { href: "/reception", label: "Recepción", icon: Wrench },
+  { href: "/orders", label: "Tablero Kanban", icon: Columns3 },
   { href: "/reports", label: "Órdenes", icon: ClipboardList },
+  { href: "/delivery", label: "Entregas", icon: PackageCheck },
   { href: "/customers", label: "Clientes", icon: Building2 },
   { href: "/devices", label: "Dispositivos", icon: Smartphone },
   { href: "/parts", label: "Inventario", icon: Package },

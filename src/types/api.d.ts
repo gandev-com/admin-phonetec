@@ -251,6 +251,128 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/customers/{id}/reports": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Crear orden directamente desde el perfil del cliente */
+        post: operations["CustomersController_createReport"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/reports": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Listar informes/órdenes con filtros */
+        get: operations["ReportsController_findAll"];
+        put?: never;
+        /** Crear nuevo informe/orden de reparación */
+        post: operations["ReportsController_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/reports/stats": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Estadísticas de informes */
+        get: operations["ReportsController_getStats"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/reports/order/{orderNumber}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Buscar informe por número de orden */
+        get: operations["ReportsController_findByOrderNumber"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/reports/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Obtener informe completo por ID */
+        get: operations["ReportsController_findOne"];
+        put?: never;
+        post?: never;
+        /** Eliminar informe */
+        delete: operations["ReportsController_remove"];
+        options?: never;
+        head?: never;
+        /** Actualizar informe (estado, diagnóstico, costes...) */
+        patch: operations["ReportsController_update"];
+        trace?: never;
+    };
+    "/reports/{id}/ready-for-pickup": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        /** Marcar orden como lista para recogida (READY_FOR_PICKUP) */
+        patch: operations["ReportsController_markReadyForPickup"];
+        trace?: never;
+    };
+    "/reports/{id}/deliver": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Entregar dispositivo: sube documento firmado y pasa a DELIVERED */
+        post: operations["ReportsController_deliverWithConsent"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/brands": {
         parameters: {
             query?: never;
@@ -409,77 +531,6 @@ export interface paths {
         options?: never;
         head?: never;
         patch?: never;
-        trace?: never;
-    };
-    "/reports": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** Listar informes/órdenes con filtros */
-        get: operations["ReportsController_findAll"];
-        put?: never;
-        /** Crear nuevo informe/orden de reparación */
-        post: operations["ReportsController_create"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/reports/stats": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** Estadísticas de informes */
-        get: operations["ReportsController_getStats"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/reports/order/{orderNumber}": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** Buscar informe por número de orden */
-        get: operations["ReportsController_findByOrderNumber"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/reports/{id}": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** Obtener informe completo por ID */
-        get: operations["ReportsController_findOne"];
-        put?: never;
-        post?: never;
-        /** Eliminar informe */
-        delete: operations["ReportsController_remove"];
-        options?: never;
-        head?: never;
-        /** Actualizar informe (estado, diagnóstico, costes...) */
-        patch: operations["ReportsController_update"];
         trace?: never;
     };
     "/parts": {
@@ -687,53 +738,6 @@ export interface components {
             internalNotes?: string;
         };
         UpdateCustomerDto: Record<string, never>;
-        CreateBrandDto: {
-            name: string;
-            logo?: string;
-            /** @default true */
-            isActive: boolean;
-            /** @default 0 */
-            order: number;
-        };
-        CreateDeviceModelDto: {
-            name: string;
-            brandId: string;
-        };
-        UpdateBrandDto: Record<string, never>;
-        CreateDeviceDto: {
-            /** Format: uuid */
-            customerId: string;
-            /** Format: uuid */
-            brandId: string;
-            model: string;
-            imeiIn?: string;
-            imeiOut?: string;
-            serialNumber?: string;
-            /** @default false */
-            hasBackCover: boolean;
-            /** @default false */
-            hasBattery: boolean;
-            /** @default false */
-            hasSimCard: boolean;
-            /** @default false */
-            hasSdCard: boolean;
-            /** @default false */
-            hasCharger: boolean;
-            otherAccessories?: string;
-            screenCondition?: string;
-            caseCondition?: string;
-            dents?: string;
-            scratches?: string;
-            /** @default false */
-            hasPattern: boolean;
-            /** @default false */
-            hasPin: boolean;
-            /** @default false */
-            hasFingerprint: boolean;
-            /** @default false */
-            patternUnlocked: boolean;
-        };
-        UpdateDeviceDto: Record<string, never>;
         CreateReportDto: {
             reportType: Record<string, never>;
             /** Format: uuid */
@@ -788,6 +792,53 @@ export interface components {
             internalNotes?: string;
             customerNotes?: string;
         };
+        CreateBrandDto: {
+            name: string;
+            logo?: string;
+            /** @default true */
+            isActive: boolean;
+            /** @default 0 */
+            order: number;
+        };
+        CreateDeviceModelDto: {
+            name: string;
+            brandId: string;
+        };
+        UpdateBrandDto: Record<string, never>;
+        CreateDeviceDto: {
+            /** Format: uuid */
+            customerId: string;
+            /** Format: uuid */
+            brandId: string;
+            model: string;
+            imeiIn?: string;
+            imeiOut?: string;
+            serialNumber?: string;
+            /** @default false */
+            hasBackCover: boolean;
+            /** @default false */
+            hasBattery: boolean;
+            /** @default false */
+            hasSimCard: boolean;
+            /** @default false */
+            hasSdCard: boolean;
+            /** @default false */
+            hasCharger: boolean;
+            otherAccessories?: string;
+            screenCondition?: string;
+            caseCondition?: string;
+            dents?: string;
+            scratches?: string;
+            /** @default false */
+            hasPattern: boolean;
+            /** @default false */
+            hasPin: boolean;
+            /** @default false */
+            hasFingerprint: boolean;
+            /** @default false */
+            patternUnlocked: boolean;
+        };
+        UpdateDeviceDto: Record<string, never>;
         CreatePartDto: {
             code: string;
             name: string;
@@ -1208,6 +1259,248 @@ export interface operations {
             };
         };
     };
+    CustomersController_createReport: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CreateReportDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>;
+                };
+            };
+        };
+    };
+    ReportsController_findAll: {
+        parameters: {
+            query?: {
+                search?: string;
+                customerId?: string;
+                deviceId?: string;
+                technicianId?: string;
+                reportType?: components["schemas"]["Object"];
+                currentStatus?: components["schemas"]["Object"];
+                paymentStatus?: components["schemas"]["Object"];
+                priority?: components["schemas"]["Object"];
+                isUrgent?: boolean;
+                dateFrom?: string;
+                dateTo?: string;
+                sortBy?: "createdAt" | "receptionDate" | "estimatedDeliveryDate" | "priority" | "orderNumber" | "total" | "currentStatus";
+                order?: "asc" | "desc";
+                activeFirst?: boolean;
+                include?: string;
+                page?: number;
+                limit?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    ReportsController_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CreateReportDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>;
+                };
+            };
+        };
+    };
+    ReportsController_getStats: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    ReportsController_findByOrderNumber: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                orderNumber: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>;
+                };
+            };
+        };
+    };
+    ReportsController_findOne: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>;
+                };
+            };
+        };
+    };
+    ReportsController_remove: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    ReportsController_update: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["UpdateReportDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>;
+                };
+            };
+        };
+    };
+    ReportsController_markReadyForPickup: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>;
+                };
+            };
+        };
+    };
+    ReportsController_deliverWithConsent: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "multipart/form-data": {
+                    /**
+                     * Format: binary
+                     * @description Documento de consentimiento firmado (PDF, JPEG o PNG)
+                     */
+                    file: string;
+                    /** @description Nombre del cliente que firma */
+                    signedBy: string;
+                    /** @description ID del técnico que realiza la entrega (opcional) */
+                    technicianId?: string;
+                };
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>;
+                };
+            };
+        };
+    };
     BrandsController_findAll: {
         parameters: {
             query?: {
@@ -1555,167 +1848,6 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content?: never;
-            };
-        };
-    };
-    ReportsController_findAll: {
-        parameters: {
-            query?: {
-                search?: string;
-                customerId?: string;
-                deviceId?: string;
-                technicianId?: string;
-                reportType?: components["schemas"]["Object"];
-                currentStatus?: components["schemas"]["Object"];
-                paymentStatus?: components["schemas"]["Object"];
-                priority?: components["schemas"]["Object"];
-                isUrgent?: boolean;
-                dateFrom?: string;
-                dateTo?: string;
-                sortBy?: "createdAt" | "receptionDate" | "estimatedDeliveryDate" | "priority" | "orderNumber" | "total" | "currentStatus";
-                order?: "asc" | "desc";
-                activeFirst?: boolean;
-                include?: string;
-                page?: number;
-                limit?: number;
-            };
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
-    };
-    ReportsController_create: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["CreateReportDto"];
-            };
-        };
-        responses: {
-            201: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": Record<string, never>;
-                };
-            };
-        };
-    };
-    ReportsController_getStats: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
-    };
-    ReportsController_findByOrderNumber: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                orderNumber: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": Record<string, never>;
-                };
-            };
-        };
-    };
-    ReportsController_findOne: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                id: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": Record<string, never>;
-                };
-            };
-        };
-    };
-    ReportsController_remove: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                id: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
-    };
-    ReportsController_update: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                id: string;
-            };
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["UpdateReportDto"];
-            };
-        };
-        responses: {
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": Record<string, never>;
-                };
             };
         };
     };
