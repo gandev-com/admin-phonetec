@@ -30,7 +30,7 @@ export default function LoginPage() {
       {/* ── Left panel – branding ── */}
       <div className="relative hidden flex-col justify-between overflow-hidden bg-sidebar px-10 py-12 lg:flex lg:w-[46%]">
         {/* background glow */}
-        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_top_left,_rgba(38,219,223,0.18),_transparent_55%),radial-gradient(ellipse_at_bottom_right,_rgba(38,223,201,0.10),_transparent_50%)]" />
+        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_top_left,_rgba(37,99,235,0.20),_transparent_55%),radial-gradient(ellipse_at_bottom_right,_rgba(96,165,250,0.12),_transparent_50%)]" />
 
         {/* Logo */}
         <div className="relative flex items-center gap-3">

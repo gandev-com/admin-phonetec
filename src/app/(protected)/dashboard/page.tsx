@@ -1,23 +1,25 @@
-import { DashboardStats, DashboardStatusBreakdown } from "@/features/reports/components/dashboard-stats";
-import { RecentReports } from "@/features/reports/components/recent-reports";
+import { KPIStrip }          from '@/components/dashboard/kpi-strip'
+import { UrgentAlert }       from '@/components/dashboard/urgent-alert'
+import { ActiveOrdersBoard } from '@/components/dashboard/active-orders-board'
+import { RecentFeed }        from '@/components/dashboard/recent-feed'
 
 export default function DashboardPage() {
   return (
-    <section className="space-y-6">
-      <div>
-        <h1 className="text-2xl font-semibold text-foreground">Dashboard</h1>
-        <p className="text-sm text-muted-foreground">Resumen de órdenes y actividad del taller.</p>
-      </div>
+    <div className="space-y-5">
+      {/* Urgent orders alert — renders only when there are urgent orders */}
+      <UrgentAlert />
 
-      <DashboardStats />
+      {/* KPI row */}
+      <KPIStrip />
 
-      <div className="grid gap-6 xl:grid-cols-3">
-        <div className="xl:col-span-1">
-          <h2 className="mb-3 text-sm font-semibold text-foreground">Órdenes por estado</h2>
-          <DashboardStatusBreakdown />
+      {/* Main grid */}
+      <div className="grid grid-cols-1 gap-5 xl:grid-cols-3">
+        <div className="xl:col-span-2">
+          <ActiveOrdersBoard />
         </div>
-        <RecentReports />
+        <RecentFeed />
       </div>
-    </section>
-  );
+    </div>
+  )
 }
+

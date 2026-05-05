@@ -5,6 +5,35 @@
 @custom-variant dark (&:is(.dark *));
 
 @theme inline {
+  /* Surface scale — neutral slate */
+  --color-surface-0:   #ffffff;
+  --color-surface-50:  #f8fafc;
+  --color-surface-100: #f1f5f9;
+  --color-surface-200: #e2e8f0;
+  --color-surface-300: #cbd5e1;
+  --color-surface-400: #94a3b8;
+  --color-surface-500: #64748b;
+  --color-surface-600: #475569;
+  --color-surface-700: #334155;
+  --color-surface-800: #1e293b;
+  --color-surface-900: #0f172a;
+
+  /* Brand scale — blue */
+  --color-brand-50:  #eff6ff;
+  --color-brand-100: #dbeafe;
+  --color-brand-200: #bfdbfe;
+  --color-brand-300: #93c5fd;
+  --color-brand-400: #60a5fa;
+  --color-brand-500: #3b82f6;
+  --color-brand-600: #2563eb;
+  --color-brand-700: #1d4ed8;
+  --color-brand-800: #1e40af;
+  --color-brand-900: #1e3a5f;
+
+  /* Animations */
+  --animate-fade-in:  fadeIn 0.2s ease-out;
+  --animate-slide-up: slideUp 0.2s ease-out;
+
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --font-sans: var(--font-geist-sans);
@@ -49,117 +78,117 @@
 }
 
 /* ─────────────────────────────────────────────
-   PhoneTec brand palette
-   Light  · bg #d8d9cb · text #181b19 · action #26dbdf
-   Dark   · bg #0b0910 · surface #013440 · action #26dfc9
+   PhoneTec — design system palette
+   Aligned with surface-* (slate) + brand-* (blue) scales
+   All existing Shadcn/ui component tokens auto-inherit this
 ───────────────────────────────────────────── */
 
 :root {
-  /* Core */
-  --background: #d8d9cb;
-  --foreground: #181b19;
+  /* Core — white / near-white page */
+  --background: #f8fafc;        /* surface-50  */
+  --foreground: #0f172a;        /* surface-900 */
 
-  /* Cards & popovers sit slightly lighter than the page */
-  --card: #e3e4d7;
-  --card-foreground: #181b19;
-  --popover: #e3e4d7;
-  --popover-foreground: #181b19;
+  /* Cards — pure white */
+  --card: #ffffff;
+  --card-foreground: #0f172a;
+  --popover: #ffffff;
+  --popover-foreground: #0f172a;
 
-  /* Brand cyan as primary action colour */
-  --primary: #26dbdf;
-  --primary-foreground: #0b0910;
+  /* Primary — brand blue */
+  --primary: #2563eb;           /* brand-600 */
+  --primary-foreground: #ffffff;
 
-  /* Subtle surface */
-  --secondary: #c8c9bc;
-  --secondary-foreground: #181b19;
+  /* Subtle surfaces */
+  --secondary: #f1f5f9;         /* surface-100 */
+  --secondary-foreground: #334155; /* surface-700 */
 
   /* Muted / placeholder */
-  --muted: #c8c9bc;
-  --muted-foreground: #5a5d58;
+  --muted: #f1f5f9;             /* surface-100 */
+  --muted-foreground: #64748b;  /* surface-500 */
 
-  /* Accent matches primary */
-  --accent: #26dbdf;
-  --accent-foreground: #0b0910;
+  /* Accent — brand-50 tint */
+  --accent: #eff6ff;            /* brand-50  */
+  --accent-foreground: #1d4ed8; /* brand-700 */
 
-  /* Destructive stays red */
+  /* Destructive — red */
   --destructive: oklch(0.577 0.245 27.325);
 
   /* Borders & inputs */
-  --border: rgba(24, 27, 25, 0.15);
-  --input: rgba(24, 27, 25, 0.12);
-  --ring: #26dbdf;
+  --border: #e2e8f0;            /* surface-200 */
+  --input: #e2e8f0;             /* surface-200 */
+  --ring: #2563eb;              /* brand-600  */
 
-  /* Charts – teal scale */
-  --chart-1: #26dbdf;
-  --chart-2: oklch(0.65 0.12 196);
-  --chart-3: oklch(0.52 0.10 196);
-  --chart-4: oklch(0.40 0.08 196);
-  --chart-5: oklch(0.28 0.06 196);
+  /* Charts — brand blue scale */
+  --chart-1: #3b82f6;           /* brand-500 */
+  --chart-2: #2563eb;           /* brand-600 */
+  --chart-3: #60a5fa;           /* brand-400 */
+  --chart-4: #93c5fd;           /* brand-300 */
+  --chart-5: #1d4ed8;           /* brand-700 */
 
   --radius: 0.625rem;
 
-  /* Sidebar – dark panel in light mode for contrast */
-  --sidebar: #181b19;
-  --sidebar-foreground: #d8d9cb;
-  --sidebar-primary: #26dbdf;
-  --sidebar-primary-foreground: #0b0910;
-  --sidebar-accent: rgba(38, 219, 223, 0.12);
-  --sidebar-accent-foreground: #d8d9cb;
-  --sidebar-border: rgba(216, 217, 203, 0.08);
-  --sidebar-ring: #26dbdf;
+  /* Sidebar — surface-900 dark panel */
+  --sidebar: #0f172a;           /* surface-900 */
+  --sidebar-foreground: #f8fafc;
+  --sidebar-primary: #2563eb;   /* brand-600 */
+  --sidebar-primary-foreground: #ffffff;
+  --sidebar-accent: rgba(37, 99, 235, 0.15);
+  --sidebar-accent-foreground: #f8fafc;
+  --sidebar-border: rgba(248, 250, 252, 0.08);
+  --sidebar-ring: #2563eb;
 }
 
 .dark {
   /* Core */
-  --background: #0b0910;
-  --foreground: #d8d9cb;
+  --background: #0f172a;        /* surface-900 */
+  --foreground: #f8fafc;        /* surface-50  */
 
-  /* Cards lift slightly above the page */
-  --card: #0f1520;
-  --card-foreground: #d8d9cb;
-  --popover: #0f1520;
-  --popover-foreground: #d8d9cb;
+  /* Cards */
+  --card: #1e293b;              /* surface-800 */
+  --card-foreground: #f8fafc;
+  --popover: #1e293b;
+  --popover-foreground: #f8fafc;
 
-  /* Brand teal-cyan as primary action colour */
-  --primary: #26dfc9;
-  --primary-foreground: #0b0910;
+  /* Primary — slightly lighter for dark bg */
+  --primary: #3b82f6;           /* brand-500 */
+  --primary-foreground: #ffffff;
 
-  /* Deep teal surface */
-  --secondary: #013440;
-  --secondary-foreground: #d8d9cb;
+  /* Surfaces */
+  --secondary: #1e293b;         /* surface-800 */
+  --secondary-foreground: #cbd5e1; /* surface-300 */
 
   /* Muted */
-  --muted: #0e1e28;
-  --muted-foreground: #8a9a96;
+  --muted: #1e293b;
+  --muted-foreground: #94a3b8;  /* surface-400 */
 
-  /* Accent matches primary */
-  --accent: #013440;
-  --accent-foreground: #d8d9cb;
+  /* Accent */
+  --accent: #1e293b;
+  --accent-foreground: #60a5fa; /* brand-400 */
 
-  /* Destructive stays red */
+  /* Destructive */
   --destructive: oklch(0.704 0.191 22.216);
 
   /* Borders & inputs */
-  --border: rgba(216, 217, 203, 0.1);
-  --input: rgba(216, 217, 203, 0.15);
-  --ring: #26dfc9;
+  --border: rgba(248, 250, 252, 0.10);
+  --input: rgba(248, 250, 252, 0.15);
+  --ring: #3b82f6;
 
-  /* Charts – teal scale */
-  --chart-1: #26dfc9;
-  --chart-2: oklch(0.65 0.11 185);
-  --chart-3: oklch(0.52 0.09 185);
-  --chart-4: oklch(0.40 0.07 185);
-  --chart-5: oklch(0.28 0.05 185);
+  /* Charts */
+  --chart-1: #60a5fa;
+  --chart-2: #3b82f6;
+  --chart-3: #93c5fd;
+  --chart-4: #bfdbfe;
+  --chart-5: #2563eb;
 
-  /* Sidebar uses deep teal surface */
-  --sidebar: #013440;
-  --sidebar-foreground: #d8d9cb;
-  --sidebar-primary: #26dfc9;
-  --sidebar-primary-foreground: #0b0910;
-  --sidebar-accent: rgba(38, 223, 201, 0.1);
-  --sidebar-accent-foreground: #d8d9cb;
-  --sidebar-border: rgba(216, 217, 203, 0.06);
-  --sidebar-ring: #26dfc9;
+  /* Sidebar */
+  --sidebar: #1e293b;           /* surface-800 */
+  --sidebar-foreground: #f8fafc;
+  --sidebar-primary: #3b82f6;
+  --sidebar-primary-foreground: #ffffff;
+  --sidebar-accent: rgba(96, 165, 250, 0.10);
+  --sidebar-accent-foreground: #f8fafc;
+  --sidebar-border: rgba(248, 250, 252, 0.06);
+  --sidebar-ring: #3b82f6;
 }
 
 @layer base {
@@ -172,4 +201,14 @@
   html {
     @apply font-sans;
   }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+@keyframes slideUp {
+  from { transform: translateY(8px); opacity: 0; }
+  to   { transform: translateY(0);   opacity: 1; }
 }
