@@ -129,7 +129,30 @@ export function PartsTable() {
 
           {!partsQuery.isPending && !partsQuery.isError && parts.length > 0 ? (
             <div className="space-y-4">
-              <div className="overflow-hidden rounded-xl border">
+              <div className="flex items-center justify-between text-sm text-muted-foreground">
+                <span>
+                  {total} repuesto{total !== 1 ? "s" : ""} &mdash; página {page} de {totalPages}
+                </span>
+                <div className="flex gap-2">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    disabled={page <= 1}
+                    onClick={() => setPage((p) => p - 1)}
+                  >
+                    Anterior
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    disabled={page >= totalPages}
+                    onClick={() => setPage((p) => p + 1)}
+                  >
+                    Siguiente
+                  </Button>
+                </div>
+              </div>
+              <div className="overflow-x-auto rounded-xl border">
                 <Table>
                   <TableHeader>
                     <TableRow className="bg-muted/40">
@@ -208,30 +231,6 @@ export function PartsTable() {
                     })}
                   </TableBody>
                 </Table>
-              </div>
-
-              <div className="flex items-center justify-between text-sm text-muted-foreground">
-                <span>
-                  {total} repuesto{total !== 1 ? "s" : ""} &mdash; página {page} de {totalPages}
-                </span>
-                <div className="flex gap-2">
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    disabled={page <= 1}
-                    onClick={() => setPage((p) => p - 1)}
-                  >
-                    Anterior
-                  </Button>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    disabled={page >= totalPages}
-                    onClick={() => setPage((p) => p + 1)}
-                  >
-                    Siguiente
-                  </Button>
-                </div>
               </div>
             </div>
           ) : null}

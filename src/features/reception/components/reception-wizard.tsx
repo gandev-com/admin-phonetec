@@ -3,17 +3,18 @@
 import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import Link from "next/link";
-import { CheckCircle2, ChevronRight, Smartphone } from "lucide-react";
+import { CheckCircle2, ChevronRight, Mail, MapPin, Phone, Smartphone, StickyNote, User } from "lucide-react";
 import { toast } from "sonner";
 import { useForm, Controller, useWatch } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 
-import { Button } from "@/components/ui/button";
+import { Button, buttonVariants } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Separator } from "@/components/ui/separator";
 import { Textarea } from "@/components/ui/textarea";
 
 import { CustomerSearchBar } from "./customer-search-bar";
@@ -217,12 +218,7 @@ export function ReceptionWizard() {
         <Card>
           <CardHeader>
             <div className="flex items-center justify-between">
-              <div>
-                <CardTitle>Dispositivo</CardTitle>
-                <p className="text-sm text-muted-foreground mt-0.5">
-                  Cliente: {customer.firstName} {customer.lastName}
-                </p>
-              </div>
+              <CardTitle>Dispositivo</CardTitle>
               <button
                 type="button"
                 onClick={() => setStep("search")}
@@ -233,6 +229,7 @@ export function ReceptionWizard() {
             </div>
           </CardHeader>
           <CardContent className="space-y-4">
+            <CustomerInfoCard customer={customer} />
             {step === "select-device" && (
               <>
                 {devicesQuery.isPending && (
@@ -335,13 +332,7 @@ export function ReceptionWizard() {
         <Card>
           <CardHeader>
             <div className="flex items-center justify-between">
-              <div>
-                <CardTitle>Nueva orden</CardTitle>
-                <p className="text-sm text-muted-foreground mt-0.5">
-                  {customer.firstName} {customer.lastName} ·{" "}
-                  {selectedDevice.brand?.name} {selectedDevice.model}
-                </p>
-              </div>
+              <CardTitle>Nueva orden</CardTitle>
               <button
                 type="button"
                 onClick={() => setStep("select-device")}
@@ -352,6 +343,22 @@ export function ReceptionWizard() {
             </div>
           </CardHeader>
           <CardContent>
+            <div className="space-y-4">
+              <CustomerInfoCard customer={customer} />
+
+              {/* Device summary */}
+              <div className="flex items-center gap-3 rounded-xl border bg-muted/30 px-4 py-3">
+                <Smartphone className="h-4 w-4 shrink-0 text-muted-foreground" />
+                <div className="min-w-0">
+                  <p className="text-sm font-medium text-foreground">
+                    {selectedDevice.brand?.name} {selectedDevice.model}
+                  </p>
+                  {selectedDevice.imeiIn ? (
+                    <p className="text-xs text-muted-foreground">IMEI: {selectedDevice.imeiIn}</p>
+                  ) : null}
+                </div>
+              </div>
+
             <form
               onSubmit={handleOrderSubmit((data) => createOrderMutation.mutate(data))}
               className="space-y-4"
@@ -463,6 +470,7 @@ export function ReceptionWizard() {
                 </Button>
               </div>
             </form>
+            </div>
           </CardContent>
         </Card>
       )}
@@ -486,7 +494,7 @@ export function ReceptionWizard() {
               </Button>
               <Link
                 href={`/reports/${createdReport.id}`}
-                className="inline-flex h-9 items-center gap-1.5 rounded-lg bg-primary px-4 text-sm font-medium text-primary-foreground hover:bg-primary/80"
+                className={buttonVariants({ variant: "default" })}
               >
                 Ver orden
               </Link>
@@ -494,6 +502,88 @@ export function ReceptionWizard() {
           </CardContent>
         </Card>
       )}
+    </div>
+  );
+}
+
+// ─── Customer info card ────────────────────────────────────────────────────────
+
+function CustomerInfoCard({ customer }: { customer: Customer }) {
+  const fullName = [customer.firstName, customer.lastName, customer.secondLastName]
+    .filter(Boolean)
+    .join(" ");
+  const initials = `${customer.firstName[0] ?? ""}${customer.lastName[0] ?? ""}`.toUpperCase();
+  const location = [customer.address, customer.postalCode, customer.city, customer.province]
+    .filter(Boolean)
+    .join(", ");
+
+  return (
+    <div className="rounded-xl border bg-muted/30 p-4 space-y-3">
+      {/* Name + doc + profile link */}
+      <div className="flex items-start justify-between gap-3">
+        <div className="flex items-center gap-3">
+          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-primary/10 text-sm font-semibold text-primary">
+            {initials}
+          </div>
+          <div>
+            <p className="text-sm font-semibold text-foreground">{fullName}</p>
+            <p className="text-xs text-muted-foreground">
+              {customer.documentType} {customer.document}
+            </p>
+          </div>
+        </div>
+        <Link
+          href={`/customers/${customer.id}`}
+          target="_blank"
+          className={buttonVariants({ variant: "ghost", size: "xs" })}
+        >
+          <User className="h-3 w-3" />
+          Perfil
+        </Link>
+      </div>
+
+      <Separator />
+
+      {/* Contact grid */}
+      <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
+        <div className="flex items-center gap-2 text-xs text-muted-foreground">
+          <Phone className="h-3.5 w-3.5 shrink-0" />
+          <span className="text-foreground">{customer.phone1}</span>
+        </div>
+
+        {customer.phone2 ? (
+          <div className="flex items-center gap-2 text-xs text-muted-foreground">
+            <Phone className="h-3.5 w-3.5 shrink-0" />
+            <span className="text-foreground">{customer.phone2}</span>
+            <span className="text-muted-foreground">(alt.)</span>
+          </div>
+        ) : null}
+
+        {customer.email ? (
+          <div className="flex items-center gap-2 text-xs text-muted-foreground sm:col-span-2">
+            <Mail className="h-3.5 w-3.5 shrink-0" />
+            <span className="truncate text-foreground">{customer.email}</span>
+          </div>
+        ) : null}
+
+        {location ? (
+          <div className="flex items-start gap-2 text-xs text-muted-foreground sm:col-span-2">
+            <MapPin className="mt-0.5 h-3.5 w-3.5 shrink-0" />
+            <span className="text-foreground">{location}</span>
+          </div>
+        ) : null}
+      </div>
+
+      {/* Internal notes */}
+      {customer.internalNotes ? (
+        <>
+          <Separator />
+          <div className="flex items-start gap-2 text-xs">
+            <StickyNote className="mt-0.5 h-3.5 w-3.5 shrink-0 text-amber-500" />
+            <p className="text-muted-foreground">{customer.internalNotes}</p>
+          </div>
+        </>
+      ) : null}
     </div>
   );
 }

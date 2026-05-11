@@ -7,7 +7,7 @@ import { Eye, Plus } from "lucide-react";
 
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
+import { Button, buttonVariants } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -87,7 +87,30 @@ export function CustomersTable() {
 
           {!customersQuery.isPending && !customersQuery.isError && customers.length > 0 ? (
             <div className="space-y-4">
-              <div className="overflow-hidden rounded-xl border">
+              <div className="flex items-center justify-between text-sm text-muted-foreground">
+                <span>
+                  {total} cliente{total !== 1 ? "s" : ""} &mdash; página {page} de {totalPages}
+                </span>
+                <div className="flex gap-2">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    disabled={page <= 1}
+                    onClick={() => setPage((p) => p - 1)}
+                  >
+                    Anterior
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    disabled={page >= totalPages}
+                    onClick={() => setPage((p) => p + 1)}
+                  >
+                    Siguiente
+                  </Button>
+                </div>
+              </div>
+              <div className="overflow-x-auto rounded-xl border">
                 <Table>
                   <TableHeader>
                     <TableRow className="bg-muted/40">
@@ -136,7 +159,7 @@ export function CustomersTable() {
                         <TableCell>
                           <Link
                             href={`/customers/${customer.id}`}
-                            className="inline-flex h-8 w-8 items-center justify-center rounded-lg text-muted-foreground hover:bg-muted hover:text-foreground"
+                            className={buttonVariants({ variant: "ghost", size: "icon" })}
                           >
                             <Eye className="h-4 w-4" />
                           </Link>
@@ -145,30 +168,6 @@ export function CustomersTable() {
                     ))}
                   </TableBody>
                 </Table>
-              </div>
-
-              <div className="flex items-center justify-between text-sm text-muted-foreground">
-                <span>
-                  {total} cliente{total !== 1 ? "s" : ""} &mdash; página {page} de {totalPages}
-                </span>
-                <div className="flex gap-2">
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    disabled={page <= 1}
-                    onClick={() => setPage((p) => p - 1)}
-                  >
-                    Anterior
-                  </Button>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    disabled={page >= totalPages}
-                    onClick={() => setPage((p) => p + 1)}
-                  >
-                    Siguiente
-                  </Button>
-                </div>
               </div>
             </div>
           ) : null}

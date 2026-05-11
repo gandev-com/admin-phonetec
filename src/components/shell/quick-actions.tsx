@@ -40,23 +40,15 @@ export function QuickActions() {
       >
         {actions.map(({ href, label, icon: Icon, color }) => (
           <Link key={href} href={href} onClick={() => setOpen(false)}>
-            <div className="group flex items-center gap-2.5">
-              <span
-                className="whitespace-nowrap rounded-lg bg-surface-900 px-2.5 py-1 text-xs
-                           font-medium text-white opacity-0 transition-opacity group-hover:opacity-100"
-              >
-                {label}
-              </span>
-              <button
-                aria-label={label}
-                className={cn(
-                  'flex h-10 w-10 items-center justify-center rounded-full text-white shadow-lg transition-all',
-                  color,
-                )}
-              >
-                <Icon className="h-4 w-4" />
-              </button>
-            </div>
+            <button
+              aria-label={label}
+              className={cn(
+                'flex h-10 w-10 items-center justify-center rounded-full text-white shadow-lg transition-all',
+                color,
+              )}
+            >
+              <Icon className="h-4 w-4" />
+            </button>
           </Link>
         ))}
       </div>

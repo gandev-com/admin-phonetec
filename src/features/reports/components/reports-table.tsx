@@ -5,7 +5,7 @@ import { useQuery } from "@tanstack/react-query";
 import Link from "next/link";
 import { Plus } from "lucide-react";
 
-import { Button } from "@/components/ui/button";
+import { Button, buttonVariants } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -94,10 +94,7 @@ export function ReportsTable() {
             placeholder="Buscar por nº orden, cliente..."
             className="sm:max-w-xs"
           />
-          <Link
-            href="/reports/nuevo"
-            className="inline-flex h-8 items-center gap-1.5 rounded-lg bg-primary px-2.5 text-sm font-medium text-primary-foreground hover:bg-primary/80"
-          >
+          <Link href="/reports/nuevo" className={buttonVariants({ variant: "default" })}>
             <Plus className="h-4 w-4" />
             Nueva orden
           </Link>
@@ -127,7 +124,20 @@ export function ReportsTable() {
 
         {!reportsQuery.isPending && !reportsQuery.isError && reports.length > 0 ? (
           <div className="space-y-4">
-            <div className="overflow-hidden rounded-xl border">
+            <div className="flex items-center justify-between text-sm text-muted-foreground">
+              <span>
+                {total} orden{total !== 1 ? "es" : ""} &mdash; página {page} de {totalPages}
+              </span>
+              <div className="flex gap-2">
+                <Button variant="outline" size="sm" disabled={page <= 1} onClick={() => setPage((p) => p - 1)}>
+                  Anterior
+                </Button>
+                <Button variant="outline" size="sm" disabled={page >= totalPages} onClick={() => setPage((p) => p + 1)}>
+                  Siguiente
+                </Button>
+              </div>
+            </div>
+            <div className="overflow-x-auto rounded-xl border">
               <Table>
                 <TableHeader>
                   <TableRow className="bg-muted/40">
@@ -173,7 +183,7 @@ export function ReportsTable() {
                       <TableCell>
                         <Link
                           href={`/reports/${report.id}`}
-                          className="inline-flex items-center rounded-lg border border-border bg-background px-3 py-1 text-xs font-medium text-foreground hover:bg-muted"
+                          className={buttonVariants({ variant: "outline", size: "sm" })}
                         >
                           Ver
                         </Link>
@@ -182,20 +192,6 @@ export function ReportsTable() {
                   ))}
                 </TableBody>
               </Table>
-            </div>
-
-            <div className="flex items-center justify-between text-sm text-muted-foreground">
-              <span>
-                {total} orden{total !== 1 ? "es" : ""} &mdash; página {page} de {totalPages}
-              </span>
-              <div className="flex gap-2">
-                <Button variant="outline" size="sm" disabled={page <= 1} onClick={() => setPage((p) => p - 1)}>
-                  Anterior
-                </Button>
-                <Button variant="outline" size="sm" disabled={page >= totalPages} onClick={() => setPage((p) => p + 1)}>
-                  Siguiente
-                </Button>
-              </div>
             </div>
           </div>
         ) : null}

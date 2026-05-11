@@ -79,9 +79,9 @@ export function UsersTable() {
       <CardContent>
         {usersQuery.isPending ? (
           <div className="space-y-3">
-            <Skeleton className="h-10 w-full" />
-            <Skeleton className="h-10 w-full" />
-            <Skeleton className="h-10 w-full" />
+            {Array.from({ length: 5 }).map((_, i) => (
+              <Skeleton key={i} className="h-10 w-full" />
+            ))}
           </div>
         ) : null}
 
@@ -99,7 +99,20 @@ export function UsersTable() {
 
         {!usersQuery.isPending && !usersQuery.isError && users.length > 0 ? (
           <div className="space-y-4">
-            <div className="overflow-hidden rounded-xl border">
+            <div className="flex items-center justify-between text-sm text-muted-foreground">
+              <span>
+                {total} usuario{total !== 1 ? "s" : ""} &mdash; página {page} de {totalPages}
+              </span>
+              <div className="flex gap-2">
+                <Button variant="outline" size="sm" disabled={page <= 1} onClick={() => setPage((p) => p - 1)}>
+                  Anterior
+                </Button>
+                <Button variant="outline" size="sm" disabled={page >= totalPages} onClick={() => setPage((p) => p + 1)}>
+                  Siguiente
+                </Button>
+              </div>
+            </div>
+            <div className="overflow-x-auto rounded-xl border">
               <Table>
                 <TableHeader>
                   <TableRow className="bg-muted/40">
@@ -127,22 +140,6 @@ export function UsersTable() {
                 </TableBody>
               </Table>
             </div>
-
-            {totalPages > 1 ? (
-              <div className="flex items-center justify-between text-sm text-muted-foreground">
-                <span>
-                  {total} usuario{total !== 1 ? "s" : ""} &mdash; página {page} de {totalPages}
-                </span>
-                <div className="flex gap-2">
-                  <Button variant="outline" size="sm" disabled={page <= 1} onClick={() => setPage((p) => p - 1)}>
-                    Anterior
-                  </Button>
-                  <Button variant="outline" size="sm" disabled={page >= totalPages} onClick={() => setPage((p) => p + 1)}>
-                    Siguiente
-                  </Button>
-                </div>
-              </div>
-            ) : null}
           </div>
         ) : null}
       </CardContent>

@@ -4,6 +4,7 @@ import { useQuery } from "@tanstack/react-query";
 import Link from "next/link";
 import { ClipboardList } from "lucide-react";
 
+import { buttonVariants } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -140,7 +141,7 @@ export function CustomerDetail({ id }: CustomerDetailProps) {
           ) : null}
 
           {!ordersQuery.isPending && orders.length > 0 ? (
-            <div className="overflow-hidden rounded-xl border">
+            <div className="overflow-x-auto rounded-xl border">
               <Table>
                 <TableHeader>
                   <TableRow className="bg-muted/40">
@@ -172,7 +173,7 @@ export function CustomerDetail({ id }: CustomerDetailProps) {
                       <TableCell>
                         <Link
                           href={`/reports/${order.id}`}
-                          className="inline-flex items-center rounded-lg border border-border bg-background px-3 py-1 text-xs font-medium text-foreground hover:bg-muted"
+                          className={buttonVariants({ variant: "outline", size: "sm" })}
                         >
                           Ver
                         </Link>
