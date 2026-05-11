@@ -3,13 +3,15 @@
 import { use } from "react";
 import { useQuery } from "@tanstack/react-query";
 import Link from "next/link";
-import { ArrowLeft, Printer } from "lucide-react";
+import { ArrowLeft, ClipboardList, Download, ExternalLink, FileSignature, Printer } from "lucide-react";
 
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
+import { Button, buttonVariants } from "@/components/ui/button";
+import { Separator } from "@/components/ui/separator";
 import { Skeleton } from "@/components/ui/skeleton";
 import { reportsApi } from "@/lib/api/reports";
-import type { PaymentStatus } from "@/types/report";
+import { API_URL } from "@/lib/api/client";
+import type { ConsentDocument, PaymentStatus } from "@/types/report";
 
 const PAYMENT_LABELS: Record<PaymentStatus, string> = {
   PENDING: "Pendiente",
@@ -74,17 +76,28 @@ export default function InvoiceDetailPage({
   return (
     <section className="space-y-6">
       {/* Nav */}
-      <div className="flex items-center justify-between print:hidden">
+      <div className="flex flex-wrap items-center justify-between gap-2 print:hidden">
         <Link href="/accounting">
           <Button variant="outline" size="sm">
             <ArrowLeft className="h-3.5 w-3.5" />
             Volver
           </Button>
         </Link>
-        <Button variant="outline" size="sm" onClick={() => window.print()}>
-          <Printer className="h-3.5 w-3.5" />
-          Imprimir / PDF
-        </Button>
+        <div className="flex flex-wrap gap-2">
+          {report && (
+            <Link
+              href={`/reports/${report.id}`}
+              className={buttonVariants({ variant: "outline", size: "sm" })}
+            >
+              <ClipboardList className="h-3.5 w-3.5" />
+              Ver orden
+            </Link>
+          )}
+          <Button variant="outline" size="sm" onClick={() => window.print()}>
+            <Printer className="h-3.5 w-3.5" />
+            Imprimir / PDF
+          </Button>
+        </div>
       </div>
 
       {isPending && (
@@ -250,6 +263,75 @@ export default function InvoiceDetailPage({
               )}
             </div>
           </div>
+
+          {/* Signature documents */}
+          {(() => {
+            const allConsents: ConsentDocument[] = [
+              ...(report.consentDocuments ?? []),
+              ...(report.consentDocument && !(report.consentDocuments ?? []).find((d) => d.id === report.consentDocument!.id)
+                ? [{ ...report.consentDocument, type: "DELIVERY" as const }]
+                : []),
+            ];
+            if (allConsents.length === 0) return null;
+            return (
+              <div className="border-t border-border px-8 py-6">
+                <p className="mb-4 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                  Documentos firmados
+                </p>
+                <div className="space-y-4">
+                  {allConsents.map((doc) => {
+                    // Use relative URL so Next.js proxy (/uploads/* → API) is used,
+                    // avoiding Cross-Origin-Resource-Policy blocks.
+                    const rawUrl = doc.fileUrl ?? doc.filePath;
+                    const url = rawUrl.replace(/^https?:\/\/[^/]+/, "").replace(/^\/?\//, "/") || `/${rawUrl}`;
+                    const imageExtRe = /\.(png|jpe?g|webp)$/i;
+                    const isImage = imageExtRe.test(doc.filePath) || imageExtRe.test(doc.fileUrl ?? "") || (!doc.filePath.includes(".") && !doc.fileUrl?.includes("."));
+                    const label = doc.type === "RECEPTION" ? "Firma de recepción" : "Firma de entrega";
+                    return (
+                      <div key={doc.id} className="rounded-xl border bg-muted/30 p-4 space-y-3">
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center gap-2">
+                            <FileSignature className="h-4 w-4 text-muted-foreground" />
+                            <p className="text-sm font-medium">{label}</p>
+                          </div>
+                          <div className="flex items-center gap-2 print:hidden">
+                            <a
+                              href={url}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className={buttonVariants({ variant: "outline", size: "sm" })}
+                            >
+                              <ExternalLink className="h-3.5 w-3.5" />
+                              Ver
+                            </a>
+                            <a
+                              href={url}
+                              download
+                              className={buttonVariants({ variant: "outline", size: "sm" })}
+                            >
+                              <Download className="h-3.5 w-3.5" />
+                              Descargar
+                            </a>
+                          </div>
+                        </div>
+                        {isImage && (
+                          <div className="rounded-lg border bg-white p-2">
+                            {/* eslint-disable-next-line @next/next/no-img-element */}
+                            <img src={url} alt={label} className="h-24 w-auto max-w-full object-contain" />
+                          </div>
+                        )}
+                        <p className="text-xs text-muted-foreground">
+                          Firmado por: <span className="font-medium text-foreground">{doc.signedBy}</span>
+                          {" · "}
+                          {new Date(doc.signedAt).toLocaleString("es-ES", { dateStyle: "medium", timeStyle: "short" })}
+                        </p>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            );
+          })()}
 
           {/* Footer */}
           <div className="border-t border-border px-8 py-4 text-center text-xs text-muted-foreground">

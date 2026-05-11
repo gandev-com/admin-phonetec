@@ -102,6 +102,21 @@ export const reportsApi = {
     return response.data;
   },
 
+  async signReception(
+    id: number | string,
+    file: File,
+    signedBy: string,
+  ): Promise<Report> {
+    const client = AUTH_DISABLED ? authlessClient : apiClient;
+    const form = new FormData();
+    form.append("file", file);
+    form.append("signedBy", signedBy);
+    const response = await client.post<Report>(`/reports/${id}/reception-consent`, form, {
+      headers: { "Content-Type": "multipart/form-data" },
+    });
+    return response.data;
+  },
+
   async createForCustomer(customerId: number | string, data: Omit<CreateReportDto, "customerId">): Promise<Report> {
     const client = AUTH_DISABLED ? authlessClient : apiClient;
     const response = await client.post<Report>(`/customers/${customerId}/reports`, data);

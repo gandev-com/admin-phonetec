@@ -1,18 +1,20 @@
 "use client";
 
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { X } from "lucide-react";
+import { PenLine, UploadCloud, X } from "lucide-react";
 import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { SignaturePad, type SignaturePadHandle } from "@/components/shared/signature-pad";
 import { ConsentUploadZone } from "./consent-upload-zone";
 import { reportsApi } from "@/lib/api/reports";
 import type { Report } from "@/types/report";
 
 type Step = "summary" | "sign";
+type SignMode = "draw" | "upload";
 
 interface DeliveryModalProps {
   report: Report;
@@ -23,14 +25,21 @@ interface DeliveryModalProps {
 export function DeliveryModal({ report, onSuccess, onClose }: DeliveryModalProps) {
   const queryClient = useQueryClient();
   const [step, setStep] = useState<Step>("summary");
+  const [signMode, setSignMode] = useState<SignMode>("draw");
   const [signedBy, setSignedBy] = useState(
     report.customer ? `${report.customer.firstName} ${report.customer.lastName}` : "",
   );
+
+  // Upload mode state
   const [file, setFile] = useState<File | null>(null);
   const [preview, setPreview] = useState<string | null>(null);
 
+  // Draw mode state
+  const padRef = useRef<SignaturePadHandle>(null);
+  const [padEmpty, setPadEmpty] = useState(true);
+
   const deliverMutation = useMutation({
-    mutationFn: () => reportsApi.deliver(report.id, file!, signedBy.trim()),
+    mutationFn: (f: File) => reportsApi.deliver(report.id, f, signedBy.trim()),
     onSuccess: (updated) => {
       queryClient.invalidateQueries({ queryKey: ["reports"] });
       toast.success(`Orden ${report.orderNumber} entregada correctamente`);
@@ -45,11 +54,7 @@ export function DeliveryModal({ report, onSuccess, onClose }: DeliveryModalProps
 
   function handleFile(f: File) {
     setFile(f);
-    if (f.type.startsWith("image/")) {
-      setPreview(URL.createObjectURL(f));
-    } else {
-      setPreview(null);
-    }
+    setPreview(f.type.startsWith("image/") ? URL.createObjectURL(f) : null);
   }
 
   function handleClearFile() {
@@ -58,7 +63,20 @@ export function DeliveryModal({ report, onSuccess, onClose }: DeliveryModalProps
     setPreview(null);
   }
 
-  const canSubmit = !!file && signedBy.trim().length > 0;
+  function handleSubmit() {
+    if (signMode === "draw") {
+      const sigFile = padRef.current?.toFile(`firma-entrega-${report.orderNumber}.png`);
+      if (!sigFile) return;
+      deliverMutation.mutate(sigFile);
+    } else {
+      if (!file) return;
+      deliverMutation.mutate(file);
+    }
+  }
+
+  const nameOk = signedBy.trim().length > 0;
+  const signOk = signMode === "draw" ? !padEmpty : !!file;
+  const canSubmit = nameOk && signOk;
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
@@ -113,28 +131,72 @@ export function DeliveryModal({ report, onSuccess, onClose }: DeliveryModalProps
           </div>
         )}
 
-        {/* Step 2 — Sign & upload */}
+        {/* Step 2 — Sign */}
         {step === "sign" && (
           <div className="space-y-4 p-6">
+            {/* Mode tabs */}
+            <div className="flex rounded-lg border p-1 gap-1 bg-muted/40">
+              <button
+                type="button"
+                onClick={() => setSignMode("draw")}
+                className={`flex flex-1 items-center justify-center gap-1.5 rounded-md px-3 py-1.5 text-sm font-medium transition-colors ${
+                  signMode === "draw"
+                    ? "bg-background text-foreground shadow-sm"
+                    : "text-muted-foreground hover:text-foreground"
+                }`}
+              >
+                <PenLine className="h-3.5 w-3.5" />
+                Firma digital
+              </button>
+              <button
+                type="button"
+                onClick={() => setSignMode("upload")}
+                className={`flex flex-1 items-center justify-center gap-1.5 rounded-md px-3 py-1.5 text-sm font-medium transition-colors ${
+                  signMode === "upload"
+                    ? "bg-background text-foreground shadow-sm"
+                    : "text-muted-foreground hover:text-foreground"
+                }`}
+              >
+                <UploadCloud className="h-3.5 w-3.5" />
+                Subir documento
+              </button>
+            </div>
+
+            {/* Name field */}
             <div className="space-y-1">
-              <Label htmlFor="dm-signed-by">Firmado por (nombre del cliente) *</Label>
+              <Label htmlFor="dm-signed-by">Firmado por *</Label>
               <Input
                 id="dm-signed-by"
                 value={signedBy}
                 onChange={(e) => setSignedBy(e.target.value)}
-                placeholder="Ej: Juan García López"
+                placeholder="Nombre completo del cliente"
               />
             </div>
 
-            <div className="space-y-1">
-              <Label>Documento de consentimiento *</Label>
-              <ConsentUploadZone
-                file={file}
-                preview={preview}
-                onFile={handleFile}
-                onClear={handleClearFile}
-              />
-            </div>
+            {/* Draw mode */}
+            {signMode === "draw" && (
+              <div className="space-y-1">
+                <Label>Firma del cliente *</Label>
+                <SignaturePad
+                  ref={padRef}
+                  height={200}
+                  onChange={(isEmpty) => setPadEmpty(isEmpty)}
+                />
+              </div>
+            )}
+
+            {/* Upload mode */}
+            {signMode === "upload" && (
+              <div className="space-y-1">
+                <Label>Documento firmado *</Label>
+                <ConsentUploadZone
+                  file={file}
+                  preview={preview}
+                  onFile={handleFile}
+                  onClear={handleClearFile}
+                />
+              </div>
+            )}
 
             {deliverMutation.isError && (
               <p className="text-sm text-destructive">
@@ -152,7 +214,7 @@ export function DeliveryModal({ report, onSuccess, onClose }: DeliveryModalProps
                 ← Volver
               </button>
               <Button
-                onClick={() => deliverMutation.mutate()}
+                onClick={handleSubmit}
                 disabled={!canSubmit || deliverMutation.isPending}
                 className="bg-green-600 hover:bg-green-700 text-white"
               >

@@ -94,7 +94,7 @@ export function ReportsTable() {
             placeholder="Buscar por nº orden, cliente..."
             className="sm:max-w-xs"
           />
-          <Link href="/reports/nuevo" className={buttonVariants({ variant: "default" })}>
+          <Link href="/reception" className={buttonVariants({ variant: "default" })}>
             <Plus className="h-4 w-4" />
             Nueva orden
           </Link>

@@ -17,6 +17,7 @@ Se añadieron nuevas vistas y componentes que consumen la API de formas que el b
 4. **Urgent Alert en header** — `isUrgent=true` + `include=customer,device` + `limit=3`
 5. **StatusPill editable** — cambio de estado inline desde el dashboard sin navegar al detalle
 6. **Activity feed (RecentFeed)** — necesita campo `updatedAt` y `lastStatusChange` en el listado
+7. **Firma de recepción** — nuevo endpoint para guardar la firma digital al entregar el dispositivo en el taller
 
 ---
 
@@ -173,7 +174,52 @@ Diferencia con `PATCH /reports/:id`: endpoint especializado más ligero que no r
 
 ---
 
-## 5. MEJORA — `GET /reports/stats` — añadir `period` query param
+## 5. NUEVO ENDPOINT — Firma de recepción (consentimiento de entrada)
+
+### `POST /reports/:id/reception-consent`
+
+Usado por: `ReceptionWizard` — paso "Firma" tras crear la orden  
+El cliente firma el documento de recepción cuando deja el dispositivo en el taller.
+
+**Request:** `multipart/form-data`
+
+| Campo | Tipo | Obligatorio | Descripción |
+|---|---|---|---|
+| `file` | binary | ✅ | PNG de la firma digital o PDF/JPEG escaneado |
+| `signedBy` | string | ✅ | Nombre del firmante |
+
+**Response:** `Report` completo (igual que `/reports/:id`)
+
+**Comportamiento:**
+- Guarda el documento en la misma tabla `ConsentDocument` pero con `type: "RECEPTION"`
+- No cambia el `currentStatus` de la orden (solo adjunta el documento)
+- Si ya existe un `ConsentDocument` de recepción para esa orden, se sobreescribe (PUT semántico)
+
+**Schema sugerido en Prisma:**
+```prisma
+model ConsentDocument {
+  id        String   @id @default(uuid())
+  reportId  String
+  type      ConsentType  // RECEPTION | DELIVERY
+  filePath  String
+  signedBy  String
+  signedAt  DateTime @default(now())
+  report    Report   @relation(fields: [reportId], references: [id])
+}
+
+enum ConsentType {
+  RECEPTION
+  DELIVERY
+}
+```
+
+> Si el modelo actual de `ConsentDocument` no tiene el campo `type`, añadirlo con valor por defecto `DELIVERY` para que las firmas de entrega existentes no se vean afectadas.
+
+**Seguridad:** requiere JWT Bearer
+
+---
+
+## 6. MEJORA — `GET /reports/stats` — añadir `period` query param
 
 El KPI de "Ingresos pendientes" actualmente muestra el total histórico. El frontend quiere poder filtrar por período.
 
@@ -222,7 +268,67 @@ Actualmente al acceder a `/customers/:id` el frontend hace un segundo request pa
 
 ---
 
-## Resumen de cambios por prioridad
+## 8. MEJORA — `GET /reports/:id` — incluir `consentDocuments` como array
+
+### 8a. Devolver todos los documentos firmados
+
+Actualmente `GET /reports/:id` devuelve solo `consentDocument` (singular, delivery).  
+El frontend ahora muestra tanto la firma de recepción como la de entrega.
+
+**Cambio:** Incluir siempre `consentDocuments` (array) con todos los `ConsentDocument` de la orden.
+
+```typescript
+// Añadir al include del findOne
+include: {
+  ...existingIncludes,
+  consentDocuments: true,   // devuelve array con RECEPTION + DELIVERY
+}
+```
+
+**Campo nuevo en cada `ConsentDocument`:**
+
+```typescript
+fileUrl: string  // URL pública completa para descargar/previsualizar el archivo
+                 // Ej: "https://api.phonetec.com/uploads/consent/firma-recepcion-ORD-001.png"
+```
+
+> El frontend construye la URL como `API_URL + "/" + filePath` como fallback,
+> pero es preferible que el backend devuelva `fileUrl` explícitamente para no
+> depender de la estructura interna del servidor de archivos.
+
+### 8b. Servir archivos de firma como estáticos
+
+Los archivos PNG/PDF de firma deben ser accesibles via URL pública autenticada:
+
+```
+GET /uploads/:filename   →  devuelve el archivo binario con Content-Type correcto
+```
+
+O bien a través del mismo endpoint que ya sirve imágenes de dispositivos (si existe).
+Si los archivos se guardan en disco, NestJS `ServeStaticModule` puede exponer la carpeta.
+Si se guardan en S3/cloud, el `fileUrl` ya es la URL pública.
+
+---
+
+## 9. MEJORA — `GET /reports/:id` — incluir relaciones completas en detalle
+
+Para la vista de detalle de orden, el frontend necesita todas estas relaciones:
+
+```typescript
+include: {
+  customer: true,
+  device: { include: { brand: true } },
+  technician: true,
+  parts: true,
+  consentDocuments: true,
+}
+```
+
+Verificar que el endpoint de detalle (`getOne`) ya las incluye todas.
+Si actualmente `getOne` usa un include distinto al del listado, unificar o ampliar.
+
+---
+
 
 | # | Endpoint | Tipo | Prioridad | Usado por |
 |---|---|---|---|---|

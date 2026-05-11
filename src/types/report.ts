@@ -101,15 +101,20 @@ export interface Report {
   device?: Device;
   technician?: User;
   parts?: ReportPart[];
-  consentDocument?: ConsentDocument;
+  consentDocument?: ConsentDocument;   // legacy — delivery only
+  consentDocuments?: ConsentDocument[]; // preferred — all documents
 
   createdAt: string;
   updatedAt: string;
 }
 
+export type ConsentType = "RECEPTION" | "DELIVERY";
+
 export interface ConsentDocument {
   id: string;
+  type: ConsentType;
   filePath: string;
+  fileUrl?: string;  // full public URL served by the backend
   signedBy: string;
   signedAt: string;
 }
