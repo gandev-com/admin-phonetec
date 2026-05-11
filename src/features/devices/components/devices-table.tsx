@@ -69,7 +69,11 @@ export function DevicesTable({ customerId }: DevicesTableProps) {
             }}
           >
             <SelectTrigger className="w-44">
-              <SelectValue placeholder="Todas las marcas" />
+              <SelectValue placeholder="Todas las marcas">
+                {brandId
+                  ? (brands as Brand[]).find((b) => String(b.id) === brandId)?.name
+                  : "Todas las marcas"}
+              </SelectValue>
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="all">Todas las marcas</SelectItem>

@@ -97,25 +97,24 @@ export function CustomerSearchBar({ onSelect, onCreateNew }: CustomerSearchBarPr
       {open && results.length > 0 && (
         <ul className="absolute z-30 mt-1 w-full rounded-xl border bg-background shadow-lg max-h-72 overflow-y-auto">
           {results.map((c) => (
-            <li
-              key={c.id}
-              className="flex items-center justify-between gap-3 px-4 py-2.5 hover:bg-muted/60 transition-colors"
-            >
-              <div className="min-w-0 flex-1">
-                <p className="truncate text-sm font-medium text-foreground">
-                  {c.firstName} {c.lastName}
-                  {c.secondLastName ? ` ${c.secondLastName}` : ""}
-                </p>
-                <p className="text-xs text-muted-foreground">
-                  {c.documentType} {c.document} · {c.phone1}
-                </p>
-              </div>
+            <li key={c.id}>
               <button
                 type="button"
                 onClick={() => handleSelect(c)}
-                className="shrink-0 rounded-lg bg-primary px-3 py-1 text-xs font-medium text-primary-foreground hover:bg-primary/80"
+                className="flex w-full items-center justify-between gap-3 px-4 py-2.5 text-left hover:bg-muted/60 transition-colors"
               >
-                Nueva orden
+                <div className="min-w-0 flex-1">
+                  <p className="truncate text-sm font-medium text-foreground">
+                    {c.firstName} {c.lastName}
+                    {c.secondLastName ? ` ${c.secondLastName}` : ""}
+                  </p>
+                  <p className="text-xs text-muted-foreground">
+                    {c.documentType} {c.document} · {c.phone1}
+                  </p>
+                </div>
+                <span className="shrink-0 rounded-lg bg-primary px-3 py-1 text-xs font-medium text-primary-foreground">
+                  Seleccionar →
+                </span>
               </button>
             </li>
           ))}

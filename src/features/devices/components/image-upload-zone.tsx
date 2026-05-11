@@ -97,7 +97,9 @@ export function ImageUploadZone({ deviceId, currentCount }: ImageUploadZoneProps
               <p className="text-sm font-medium">{pendingFile.name}</p>
               <Select value={type} onValueChange={(v) => v && setType(v)}>
                 <SelectTrigger className="w-40">
-                  <SelectValue placeholder="Tipo de imagen" />
+                  <SelectValue placeholder="Tipo de imagen">
+                    {IMAGE_TYPES.find((t) => t.value === type)?.label}
+                  </SelectValue>
                 </SelectTrigger>
                 <SelectContent>
                   {IMAGE_TYPES.map((t) => (

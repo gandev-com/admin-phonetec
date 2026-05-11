@@ -32,7 +32,7 @@ export function AppHeader({ onOpenCmd }: AppHeaderProps) {
 
   const statsQuery = useQuery({
     queryKey: ["reports", "stats"],
-    queryFn: reportsApi.getStats,
+    queryFn: () => reportsApi.getStats(),
     staleTime: 60_000,
   });
 

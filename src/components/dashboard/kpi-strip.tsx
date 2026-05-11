@@ -58,7 +58,7 @@ const kpis: KPI[] = [
 export function KPIStrip() {
   const { data: stats, isPending } = useQuery({
     queryKey: ['reports', 'stats'],
-    queryFn:  reportsApi.getStats,
+    queryFn:  () => reportsApi.getStats(),
     staleTime: 60_000,
   })
 

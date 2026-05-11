@@ -760,6 +760,14 @@
             }
           },
           {
+            "name": "updatedSince",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
             "name": "include",
             "required": false,
             "in": "query",
@@ -842,7 +850,23 @@
     "/reports/stats": {
       "get": {
         "operationId": "ReportsController_getStats",
-        "parameters": [],
+        "parameters": [
+          {
+            "name": "period",
+            "required": false,
+            "in": "query",
+            "description": "Período para filtrar totales e ingresos",
+            "schema": {
+              "enum": [
+                "today",
+                "week",
+                "month",
+                "all"
+              ],
+              "type": "string"
+            }
+          }
+        ],
         "responses": {
           "200": {
             "description": ""
@@ -853,7 +877,7 @@
             "bearer": []
           }
         ],
-        "summary": "Estadísticas de informes",
+        "summary": "Estadísticas de informes (total, ingresos, urgentes, por estado)",
         "tags": [
           "Informes"
         ]
@@ -1033,6 +1057,69 @@
           }
         ],
         "summary": "Marcar orden como lista para recogida (READY_FOR_PICKUP)",
+        "tags": [
+          "Informes"
+        ]
+      }
+    },
+    "/reports/{id}/status": {
+      "patch": {
+        "operationId": "ReportsController_changeStatus",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "status"
+                ],
+                "properties": {
+                  "status": {
+                    "type": "string",
+                    "description": "Nuevo ReportStatus"
+                  },
+                  "technicianId": {
+                    "type": "string",
+                    "description": "UUID del técnico (opcional)"
+                  },
+                  "internalNote": {
+                    "type": "string",
+                    "description": "Nota interna (requerida para CANCELLED)"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Cambio de estado inline — usado por StatusPill y Kanban",
         "tags": [
           "Informes"
         ]
@@ -2205,6 +2292,45 @@
         "summary": "Listar entidades registradas en el log",
         "tags": [
           "Activity Log"
+        ]
+      }
+    },
+    "/search": {
+      "get": {
+        "operationId": "SearchController_search",
+        "parameters": [
+          {
+            "name": "q",
+            "required": true,
+            "in": "query",
+            "description": "Texto a buscar",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "limit",
+            "required": false,
+            "in": "query",
+            "description": "Máx. resultados por entidad (default 5)",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Búsqueda global unificada de órdenes y clientes (⌘K)",
+        "tags": [
+          "Búsqueda"
         ]
       }
     }

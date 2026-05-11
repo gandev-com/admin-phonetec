@@ -293,7 +293,7 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** Estadísticas de informes */
+        /** Estadísticas de informes (total, ingresos, urgentes, por estado) */
         get: operations["ReportsController_getStats"];
         put?: never;
         post?: never;
@@ -354,6 +354,23 @@ export interface paths {
         head?: never;
         /** Marcar orden como lista para recogida (READY_FOR_PICKUP) */
         patch: operations["ReportsController_markReadyForPickup"];
+        trace?: never;
+    };
+    "/reports/{id}/status": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        /** Cambio de estado inline — usado por StatusPill y Kanban */
+        patch: operations["ReportsController_changeStatus"];
         trace?: never;
     };
     "/reports/{id}/deliver": {
@@ -682,6 +699,23 @@ export interface paths {
         };
         /** Listar entidades registradas en el log */
         get: operations["ActivityLogController_getEntities"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/search": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Búsqueda global unificada de órdenes y clientes (⌘K) */
+        get: operations["SearchController_search"];
         put?: never;
         post?: never;
         delete?: never;
@@ -1301,6 +1335,7 @@ export interface operations {
                 sortBy?: "createdAt" | "receptionDate" | "estimatedDeliveryDate" | "priority" | "orderNumber" | "total" | "currentStatus";
                 order?: "asc" | "desc";
                 activeFirst?: boolean;
+                updatedSince?: string;
                 include?: string;
                 page?: number;
                 limit?: number;
@@ -1344,7 +1379,10 @@ export interface operations {
     };
     ReportsController_getStats: {
         parameters: {
-            query?: never;
+            query?: {
+                /** @description Período para filtrar totales e ingresos */
+                period?: "today" | "week" | "month" | "all";
+            };
             header?: never;
             path?: never;
             cookie?: never;
@@ -1455,6 +1493,38 @@ export interface operations {
             cookie?: never;
         };
         requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>;
+                };
+            };
+        };
+    };
+    ReportsController_changeStatus: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    /** @description Nuevo ReportStatus */
+                    status: string;
+                    /** @description UUID del técnico (opcional) */
+                    technicianId?: string;
+                    /** @description Nota interna (requerida para CANCELLED) */
+                    internalNote?: string;
+                };
+            };
+        };
         responses: {
             200: {
                 headers: {
@@ -2103,6 +2173,28 @@ export interface operations {
     ActivityLogController_getEntities: {
         parameters: {
             query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    SearchController_search: {
+        parameters: {
+            query: {
+                /** @description Texto a buscar */
+                q: string;
+                /** @description Máx. resultados por entidad (default 5) */
+                limit?: string;
+            };
             header?: never;
             path?: never;
             cookie?: never;

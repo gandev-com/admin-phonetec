@@ -33,7 +33,7 @@ function fmt(n: number | null | undefined) {
 function PaymentBreakdown() {
   const { data: stats, isPending } = useQuery({
     queryKey: ["reports", "stats"],
-    queryFn: reportsApi.getStats,
+    queryFn: () => reportsApi.getStats(),
   });
 
   const entries = (Object.keys(PAYMENT_LABELS) as PaymentStatus[]).map((key) => ({
@@ -79,7 +79,7 @@ function PaymentBreakdown() {
 function RevenueSummary() {
   const { data: stats, isPending } = useQuery({
     queryKey: ["reports", "stats"],
-    queryFn: reportsApi.getStats,
+    queryFn: () => reportsApi.getStats(),
   });
 
   const rows = [

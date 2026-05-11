@@ -14,7 +14,11 @@ export interface ActivityLog {
 
 export interface ActivityLogListParams {
   entity?: string;
+  entityId?: string;
   userId?: string;
+  action?: string;
+  dateFrom?: string;
+  dateTo?: string;
   page?: number;
   limit?: number;
 }

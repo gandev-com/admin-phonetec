@@ -49,7 +49,7 @@ function StatCard({ title, value, sub, icon: Icon, loading, accent }: StatCardPr
 export function AccountingStats() {
   const { data: stats, isPending } = useQuery({
     queryKey: ["reports", "stats"],
-    queryFn: reportsApi.getStats,
+    queryFn: () => reportsApi.getStats(),
   });
 
   const paid = stats?.byPaymentStatus?.PAID ?? 0;

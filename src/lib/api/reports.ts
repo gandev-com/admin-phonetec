@@ -43,9 +43,9 @@ export const reportsApi = {
     return response.data;
   },
 
-  async getStats(): Promise<ReportStats> {
+  async getStats(period?: 'today' | 'week' | 'month' | 'all'): Promise<ReportStats> {
     const client = AUTH_DISABLED ? authlessClient : apiClient;
-    const response = await client.get<RawStats>("/reports/stats");
+    const response = await client.get<RawStats>("/reports/stats", { params: period ? { period } : undefined });
     const raw = response.data;
     return {
       ...raw,

@@ -60,7 +60,7 @@ function StatCard({
 export function DashboardStats() {
   const statsQuery = useQuery({
     queryKey: ["reports", "stats"],
-    queryFn: reportsApi.getStats,
+    queryFn: () => reportsApi.getStats(),
   });
 
   const stats = statsQuery.data;
@@ -121,7 +121,7 @@ export function DashboardStats() {
 export function DashboardStatusBreakdown() {
   const statsQuery = useQuery({
     queryKey: ["reports", "stats"],
-    queryFn: reportsApi.getStats,
+    queryFn: () => reportsApi.getStats(),
     staleTime: 30_000,
   });
 

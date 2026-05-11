@@ -5,7 +5,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import Link from "next/link";
 import { CheckCircle2, ChevronRight, Smartphone } from "lucide-react";
 import { toast } from "sonner";
-import { useForm, Controller } from "react-hook-form";
+import { useForm, Controller, useWatch } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 
@@ -107,8 +107,7 @@ export function ReceptionWizard() {
 
   // ─── Quick device form ───────────────────────────────────────────────────────
 
-  const {
-    register: registerDevice,
+  const {    register: registerDevice,
     handleSubmit: handleDeviceSubmit,
     control: deviceControl,
     setValue: setDeviceValue,
@@ -116,6 +115,8 @@ export function ReceptionWizard() {
   } = useForm<DeviceFormValues>({
     resolver: zodResolver(deviceSchema),
   });
+
+  const deviceModelValue = useWatch({ control: deviceControl, name: 'model' });
 
   const createDeviceMutation = useMutation({
     mutationFn: (data: DeviceFormValues) =>
@@ -192,11 +193,11 @@ export function ReceptionWizard() {
 
       {/* Step: Search */}
       {step === "search" && (
-        <Card>
+        <Card className="overflow-visible">
           <CardHeader>
             <CardTitle>Buscar cliente</CardTitle>
           </CardHeader>
-          <CardContent>
+          <CardContent className="overflow-visible">
             <CustomerSearchBar onSelect={handleCustomerSelected} onCreateNew={handleNewCustomer} />
           </CardContent>
         </Card>
@@ -291,7 +292,7 @@ export function ReceptionWizard() {
                   render={({ field }) => (
                     <BrandModelSelector
                       brandId={field.value}
-                      modelValue={undefined}
+                      modelValue={deviceModelValue || undefined}
                       onBrandChange={(id) => {
                         field.onChange(id);
                         setDeviceValue("model", "");
@@ -361,19 +362,27 @@ export function ReceptionWizard() {
                   <Controller
                     control={orderControl}
                     name="reportType"
-                    render={({ field }) => (
-                      <Select value={field.value} onValueChange={field.onChange}>
-                        <SelectTrigger>
-                          <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="REPAIR_ORDER">Reparación</SelectItem>
-                          <SelectItem value="BUDGET">Presupuesto</SelectItem>
-                          <SelectItem value="REVISION">Revisión</SelectItem>
-                          <SelectItem value="WARRANTY">Garantía</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    )}
+                    render={({ field }) => {
+                      const ORDER_TYPE_LABELS: Record<string, string> = {
+                        REPAIR_ORDER: "Reparación",
+                        BUDGET: "Presupuesto",
+                        REVISION: "Revisión",
+                        WARRANTY: "Garantía",
+                      };
+                      return (
+                        <Select value={field.value} onValueChange={field.onChange}>
+                          <SelectTrigger>
+                            <SelectValue>{ORDER_TYPE_LABELS[field.value]}</SelectValue>
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="REPAIR_ORDER">Reparación</SelectItem>
+                            <SelectItem value="BUDGET">Presupuesto</SelectItem>
+                            <SelectItem value="REVISION">Revisión</SelectItem>
+                            <SelectItem value="WARRANTY">Garantía</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      );
+                    }}
                   />
                 </div>
                 <div className="space-y-1">
@@ -381,19 +390,27 @@ export function ReceptionWizard() {
                   <Controller
                     control={orderControl}
                     name="priority"
-                    render={({ field }) => (
-                      <Select value={field.value} onValueChange={field.onChange}>
-                        <SelectTrigger>
-                          <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="LOW">Baja</SelectItem>
-                          <SelectItem value="NORMAL">Normal</SelectItem>
-                          <SelectItem value="HIGH">Alta</SelectItem>
-                          <SelectItem value="URGENT">Urgente</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    )}
+                    render={({ field }) => {
+                      const PRIORITY_LABELS: Record<string, string> = {
+                        LOW: "Baja",
+                        NORMAL: "Normal",
+                        HIGH: "Alta",
+                        URGENT: "Urgente",
+                      };
+                      return (
+                        <Select value={field.value} onValueChange={field.onChange}>
+                          <SelectTrigger>
+                            <SelectValue>{PRIORITY_LABELS[field.value]}</SelectValue>
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="LOW">Baja</SelectItem>
+                            <SelectItem value="NORMAL">Normal</SelectItem>
+                            <SelectItem value="HIGH">Alta</SelectItem>
+                            <SelectItem value="URGENT">Urgente</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      );
+                    }}
                   />
                 </div>
               </div>
