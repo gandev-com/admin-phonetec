@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef } from 'react'
 import { useRouter } from 'next/navigation'
+import { useQuery } from '@tanstack/react-query'
 import {
   Search, ClipboardList, Users, Plus,
   LayoutDashboard, Wrench, Package, Receipt, Loader2,
@@ -30,58 +31,33 @@ interface CommandPaletteProps {
 }
 
 export function CommandPalette({ open, onClose }: CommandPaletteProps) {
-  const [query, setQuery]           = useState('')
-  const [selected, setSelected]     = useState(0)
-  const [customers, setCustomers]   = useState<Customer[]>([])
-  const [orders, setOrders]         = useState<Report[]>([])
-  const [searching, setSearching]   = useState(false)
+  const [query, setQuery]       = useState('')
+  const [selected, setSelected] = useState(0)
   const inputRef = useRef<HTMLInputElement>(null)
   const router   = useRouter()
   const debouncedQuery = useDebounce(query, 300)
+
+  const { data, isFetching } = useQuery({
+    queryKey: ['command-search', debouncedQuery],
+    queryFn: () => Promise.all([
+      customersApi.list({ search: debouncedQuery, limit: 5 }),
+      reportsApi.list({ search: debouncedQuery, limit: 5, include: 'customer,device' }),
+    ]),
+    enabled: debouncedQuery.trim().length > 0,
+    staleTime: 10_000,
+  })
+
+  const customers: Customer[] = data?.[0].data ?? []
+  const orders: Report[]      = data?.[1].data ?? []
+  const searching = isFetching
 
   useEffect(() => {
     if (open) {
       setQuery('')
       setSelected(0)
-      setCustomers([])
-      setOrders([])
       setTimeout(() => inputRef.current?.focus(), 50)
     }
   }, [open])
-
-  // Real API search when query is non-empty
-  useEffect(() => {
-    if (!debouncedQuery.trim()) {
-      setCustomers([])
-      setOrders([])
-      setSearching(false)
-      return
-    }
-
-    let cancelled = false
-    setSearching(true)
-
-    Promise.all([
-      customersApi.list({ search: debouncedQuery, limit: 5 }),
-      reportsApi.list({ search: debouncedQuery, limit: 5, include: 'customer,device' }),
-    ])
-      .then(([c, r]) => {
-        if (!cancelled) {
-          setCustomers(c.data ?? [])
-          setOrders(r.data ?? [])
-          setSearching(false)
-        }
-      })
-      .catch(() => {
-        if (!cancelled) {
-          setCustomers([])
-          setOrders([])
-          setSearching(false)
-        }
-      })
-
-    return () => { cancelled = true }
-  }, [debouncedQuery])
 
   const hasResults = query.trim().length > 0
   const filteredActions = query.length === 0

@@ -20,40 +20,10 @@ import createClient, { type Middleware } from "openapi-fetch";
 
 import { AUTH_DISABLED } from "@/lib/config";
 import { useAuthStore } from "@/store/auth-store";
-import { extractAuthSession } from "@/lib/api/helpers";
-import type { AuthResponse } from "@/types/auth";
+import { doTokenRefresh, handleRefreshFailure } from "@/lib/api/refresh";
 import type { paths } from "@/types/api-schema";
 
 const BASE_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:3001";
-
-// ---------------------------------------------------------------------------
-// Token refresh — mirrors the logic in the axios client so both clients share
-// the same Zustand session state.
-// ---------------------------------------------------------------------------
-
-let refreshingPromise: Promise<string> | null = null;
-
-async function doRefresh(): Promise<string> {
-  const store = useAuthStore.getState();
-  const body = store.refreshToken ? { refreshToken: store.refreshToken } : {};
-
-  const res = await fetch(`${BASE_URL}/auth/refresh`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(body),
-  });
-
-  if (!res.ok) throw new Error("Token refresh failed");
-
-  const payload: AuthResponse = await res.json();
-  const session = extractAuthSession(payload);
-  store.setSession(session);
-  return session.accessToken;
-}
-
-// ---------------------------------------------------------------------------
-// Auth middleware
-// ---------------------------------------------------------------------------
 
 const authMiddleware: Middleware = {
   /**
@@ -78,22 +48,9 @@ const authMiddleware: Middleware = {
     if (AUTH_DISABLED || response.status !== 401) return undefined;
 
     try {
-      if (!refreshingPromise) {
-        refreshingPromise = doRefresh();
-      }
-      await refreshingPromise;
-      refreshingPromise = null;
+      await doTokenRefresh();
     } catch {
-      refreshingPromise = null;
-
-      const store = useAuthStore.getState();
-      await fetch(`${BASE_URL}/auth/logout`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(store.refreshToken ? { refreshToken: store.refreshToken } : {}),
-      }).catch(() => undefined);
-
-      store.clearSession();
+      await handleRefreshFailure();
     }
 
     // Return undefined — propagate the 401 so TanStack Query retries.

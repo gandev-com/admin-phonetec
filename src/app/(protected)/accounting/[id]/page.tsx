@@ -2,6 +2,7 @@
 
 import { use, useRef } from "react";
 import { useQuery } from "@tanstack/react-query";
+import Image from "next/image";
 import Link from "next/link";
 import { ArrowLeft, ClipboardList, Download, ExternalLink, FileSignature, Printer } from "lucide-react";
 import { useReactToPrint } from "react-to-print";
@@ -315,8 +316,9 @@ export default function InvoiceDetailPage({
                         </div>
                         {isImage && (
                           <div className="rounded-lg border bg-white p-2">
-                            {/* eslint-disable-next-line @next/next/no-img-element */}
-                            <img src={url} alt={label} className="h-24 w-auto max-w-full object-contain" />
+                            <div className="relative h-24 max-w-full">
+                              <Image src={url} alt={label} fill className="object-contain" />
+                            </div>
                           </div>
                         )}
                         <p className="text-xs text-muted-foreground">

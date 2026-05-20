@@ -1,13 +1,11 @@
-import { apiClient, authlessClient } from "@/lib/api/client";
-import { AUTH_DISABLED } from "@/lib/config";
+import { httpClient } from "@/lib/api/client";
 import { normalizeListResponse } from "@/lib/api/helpers";
 import type { MaybeList, PaginatedResponse } from "@/types/api";
 import type { ChangePasswordDto, UpdateUserDto, User, UserListParams } from "@/types/user";
 
 export const usersApi = {
   async list(params: UserListParams = {}): Promise<PaginatedResponse<User>> {
-    const client = AUTH_DISABLED ? authlessClient : apiClient;
-    const response = await client.get<MaybeList<User> | PaginatedResponse<User>>("/users", { params });
+    const response = await httpClient.get<MaybeList<User> | PaginatedResponse<User>>("/users", { params });
     const data = response.data;
     if (!Array.isArray(data) && "meta" in data && typeof (data as PaginatedResponse<User>).meta?.total === "number") {
       return data as PaginatedResponse<User>;
@@ -17,30 +15,25 @@ export const usersApi = {
   },
 
   async getMe(): Promise<User> {
-    const client = AUTH_DISABLED ? authlessClient : apiClient;
-    const response = await client.get<User>("/users/me");
+    const response = await httpClient.get<User>("/users/me");
     return response.data;
   },
 
   async getOne(id: number | string): Promise<User> {
-    const client = AUTH_DISABLED ? authlessClient : apiClient;
-    const response = await client.get<User>(`/users/${id}`);
+    const response = await httpClient.get<User>(`/users/${id}`);
     return response.data;
   },
 
   async update(id: number | string, data: UpdateUserDto): Promise<User> {
-    const client = AUTH_DISABLED ? authlessClient : apiClient;
-    const response = await client.patch<User>(`/users/${id}`, data);
+    const response = await httpClient.patch<User>(`/users/${id}`, data);
     return response.data;
   },
 
   async changeMyPassword(data: ChangePasswordDto): Promise<void> {
-    const client = AUTH_DISABLED ? authlessClient : apiClient;
-    await client.patch("/users/me/password", data);
+    await httpClient.patch("/users/me/password", data);
   },
 
   async deactivate(id: number | string): Promise<void> {
-    const client = AUTH_DISABLED ? authlessClient : apiClient;
-    await client.patch(`/users/${id}/deactivate`);
+    await httpClient.patch(`/users/${id}/deactivate`);
   },
 };

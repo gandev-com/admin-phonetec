@@ -2,6 +2,7 @@
 
 import { useRef, useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import Image from "next/image";
 import Link from "next/link";
 import {
   CalendarClock,
@@ -47,6 +48,7 @@ import { reportsApi } from "@/lib/api/reports";
 import { usersApi } from "@/lib/api/users";
 import { API_URL } from "@/lib/api/client";
 import { cn } from "@/lib/utils";
+import { STATUS_LABELS } from "@/components/reports/status-badge";
 import { ReportPrintView } from "./report-print-view";
 import type {
   ConsentDocument,
@@ -61,21 +63,7 @@ import type {
 
 // ─── Display maps ─────────────────────────────────────────────────────────────
 
-const STATUS_LABELS: Record<ReportStatus, string> = {
-  RECEIVED: "Recibido",
-  IN_DIAGNOSIS: "Diagnóstico",
-  BUDGET_SENT: "Presupuesto enviado",
-  BUDGET_ACCEPTED: "Pres. aceptado",
-  BUDGET_REJECTED: "Pres. rechazado",
-  WAITING_PARTS: "Esp. repuesto",
-  IN_REPAIR: "En reparación",
-  REPAIRED: "Reparado",
-  TESTING: "En pruebas",
-  READY_FOR_PICKUP: "Listo para recoger",
-  DELIVERED: "Entregado",
-  CANCELLED: "Cancelado",
-  IRREPARABLE: "No reparable",
-};
+// STATUS_LABELS imported from @/components/reports/status-badge
 
 const STATUS_COLOR: Record<ReportStatus, string> = {
   RECEIVED: "border-blue-200 bg-blue-50 text-blue-800",
@@ -573,10 +561,9 @@ function ConsentDocCard({ doc }: { doc: ConsentDocument }) {
 
       {isImage && (
         <div className="rounded-lg border bg-white p-2">
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src={url} alt={label} className="h-24 w-auto max-w-full object-contain" />
-        </div>
-      )}
+          <div className="relative h-24 max-w-full">
+            <Image src={url} alt={label} fill className="object-contain" />
+          </div>
 
       <p className="text-xs text-muted-foreground">
         Firmado por: <span className="font-medium text-foreground">{doc.signedBy}</span>
@@ -584,8 +571,11 @@ function ConsentDocCard({ doc }: { doc: ConsentDocument }) {
         {new Date(doc.signedAt).toLocaleString("es-ES", { dateStyle: "medium", timeStyle: "short" })}
       </p>
     </div>
+      )}
+    </div>
   );
 }
+
 
 // ─── Main component ───────────────────────────────────────────────────────────
 

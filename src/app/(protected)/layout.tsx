@@ -31,7 +31,7 @@ export default function ProtectedLayout({ children }: ProtectedLayoutProps) {
   if (!hydrated || isChecking) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-background">
-        <div className="rounded-xl border bg-card px-6 py-4 text-sm text-muted-foreground">Validando sesion...</div>
+        <div className="rounded-xl border bg-card px-6 py-4 text-sm text-muted-foreground">Validando sesión...</div>
       </div>
     );
   }

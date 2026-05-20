@@ -1,53 +1,44 @@
-import { apiClient, authlessClient } from "@/lib/api/client";
-import { AUTH_DISABLED } from "@/lib/config";
+import { httpClient } from "@/lib/api/client";
 import type { PaginatedResponse } from "@/types/api";
 import type { Brand, BrandListParams, DeviceModel } from "@/types/device";
 
 export const brandsApi = {
   async list(params: BrandListParams = {}): Promise<Brand[]> {
-    const client = AUTH_DISABLED ? authlessClient : apiClient;
-    const response = await client.get<Brand[] | PaginatedResponse<Brand>>("/brands", { params });
+    const response = await httpClient.get<Brand[] | PaginatedResponse<Brand>>("/brands", { params });
     const data = response.data;
     return Array.isArray(data) ? data : data.data;
   },
 
   async getOne(id: number | string): Promise<Brand> {
-    const client = AUTH_DISABLED ? authlessClient : apiClient;
-    const response = await client.get<Brand>(`/brands/${id}`);
+    const response = await httpClient.get<Brand>(`/brands/${id}`);
     return response.data;
   },
 
   async getModels(brandId: number | string): Promise<DeviceModel[]> {
-    const client = AUTH_DISABLED ? authlessClient : apiClient;
-    const response = await client.get<DeviceModel[]>(`/brands/${brandId}/models`);
+    const response = await httpClient.get<DeviceModel[]>(`/brands/${brandId}/models`);
     return response.data;
   },
 
   async create(data: { name: string; logo?: string; isActive?: boolean; order?: number }): Promise<Brand> {
-    const client = AUTH_DISABLED ? authlessClient : apiClient;
-    const response = await client.post<Brand>("/brands", data);
+    const response = await httpClient.post<Brand>("/brands", data);
     return response.data;
   },
 
   async update(id: number | string, data: Partial<{ name: string; logo: string; isActive: boolean; order: number }>): Promise<Brand> {
-    const client = AUTH_DISABLED ? authlessClient : apiClient;
-    const response = await client.patch<Brand>(`/brands/${id}`, data);
+    const response = await httpClient.patch<Brand>(`/brands/${id}`, data);
     return response.data;
   },
 
   async remove(id: number | string): Promise<void> {
-    const client = AUTH_DISABLED ? authlessClient : apiClient;
-    await client.delete(`/brands/${id}`);
+    await httpClient.delete(`/brands/${id}`);
   },
 
   async createModel(data: { name: string; brandId: string }): Promise<DeviceModel> {
-    const client = AUTH_DISABLED ? authlessClient : apiClient;
-    const response = await client.post<DeviceModel>("/brands/models", data);
+    const response = await httpClient.post<DeviceModel>("/brands/models", data);
     return response.data;
   },
 
   async removeModel(modelId: number | string): Promise<void> {
-    const client = AUTH_DISABLED ? authlessClient : apiClient;
-    await client.delete(`/brands/models/${modelId}`);
+    await httpClient.delete(`/brands/models/${modelId}`);
   },
 };

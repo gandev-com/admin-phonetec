@@ -25,6 +25,7 @@ import {
 } from "@/components/ui/table";
 import { useDevices } from "@/features/devices/hooks/use-devices";
 import { useBrands } from "@/features/devices/hooks/use-brands";
+import { useDebounce } from "@/lib/hooks/use-debounce";
 import type { Brand, Device } from "@/types/device";
 
 interface DevicesTableProps {
@@ -33,7 +34,8 @@ interface DevicesTableProps {
 
 export function DevicesTable({ customerId }: DevicesTableProps) {
   const router = useRouter();
-  const [search, setSearch] = useState("");
+  const [rawSearch, setRawSearch] = useState("");
+  const search = useDebounce(rawSearch, 300);
   const [brandId, setBrandId] = useState<string | undefined>();
   const [page, setPage] = useState(1);
 
@@ -52,9 +54,9 @@ export function DevicesTable({ customerId }: DevicesTableProps) {
           <div className="relative max-w-xs flex-1">
             <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
             <Input
-              value={search}
+              value={rawSearch}
               onChange={(e) => {
-                setSearch(e.target.value);
+                setRawSearch(e.target.value);
                 setPage(1);
               }}
               placeholder="Buscar por modelo, IMEI..."
