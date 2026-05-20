@@ -128,6 +128,22 @@ export function InvoicesTable() {
         </div>
       </CardHeader>
 
+      {!query.isPending && !query.isError && totalPages > 1 && (
+        <div className="flex items-center justify-between border-t border-border px-6 py-2">
+          <p className="text-xs text-muted-foreground">
+            {(page - 1) * PAGE_SIZE + 1}–{Math.min(page * PAGE_SIZE, total)} de {total}
+          </p>
+          <div className="flex gap-2">
+            <Button variant="outline" size="sm" onClick={() => setPage((p) => p - 1)} disabled={page === 1}>
+              Anterior
+            </Button>
+            <Button variant="outline" size="sm" onClick={() => setPage((p) => p + 1)} disabled={page >= totalPages}>
+              Siguiente
+            </Button>
+          </div>
+        </div>
+      )}
+
       <CardContent className="px-0 pb-0">
         {query.isPending ? (
           <div className="space-y-2 px-6 pb-6">
@@ -207,22 +223,6 @@ export function InvoicesTable() {
               </TableBody>
             </Table>
 
-            {/* Pagination */}
-            {totalPages > 1 && (
-              <div className="flex items-center justify-between border-t border-border px-6 py-4">
-                <p className="text-xs text-muted-foreground">
-                  {(page - 1) * PAGE_SIZE + 1}–{Math.min(page * PAGE_SIZE, total)} de {total}
-                </p>
-                <div className="flex gap-2">
-                  <Button variant="outline" size="sm" onClick={() => setPage((p) => p - 1)} disabled={page === 1}>
-                    Anterior
-                  </Button>
-                  <Button variant="outline" size="sm" onClick={() => setPage((p) => p + 1)} disabled={page >= totalPages}>
-                    Siguiente
-                  </Button>
-                </div>
-              </div>
-            )}
           </>
         )}
       </CardContent>

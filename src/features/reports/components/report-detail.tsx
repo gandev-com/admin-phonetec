@@ -1,21 +1,31 @@
 "use client";
 
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import Link from "next/link";
 import {
+  CalendarClock,
+  CheckCircle2,
   Download,
   ExternalLink,
   FileSignature,
   FileText,
+  MapPin,
+  PackageCheck,
   Pencil,
+  Phone,
   Printer,
   Receipt,
+  ShieldCheck,
+  Smartphone,
+  User,
+  Wrench,
 } from "lucide-react";
 import { toast } from "sonner";
 import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
+import { useReactToPrint } from "react-to-print";
 
 import { Badge } from "@/components/ui/badge";
 import { Button, buttonVariants } from "@/components/ui/button";
@@ -32,9 +42,12 @@ import {
 } from "@/components/ui/sheet";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Textarea } from "@/components/ui/textarea";
+import { DeliveryModal } from "@/features/delivery/components/delivery-modal";
 import { reportsApi } from "@/lib/api/reports";
 import { usersApi } from "@/lib/api/users";
 import { API_URL } from "@/lib/api/client";
+import { cn } from "@/lib/utils";
+import { ReportPrintView } from "./report-print-view";
 import type {
   ConsentDocument,
   ExitCondition,
@@ -139,11 +152,14 @@ function fileUrl(doc: ConsentDocument): string {
   return relative.startsWith("/") ? relative : `/${relative}`;
 }
 
-function Field({ label, value }: { label: string; value?: React.ReactNode }) {
+function Field({ label, value, icon }: { label: string; value?: React.ReactNode; icon?: React.ReactNode }) {
   return (
-    <div>
-      <p className="text-xs font-medium text-muted-foreground">{label}</p>
-      <p className="mt-0.5 text-sm text-foreground">{value ?? "—"}</p>
+    <div className="flex items-start gap-2">
+      {icon && <span className="mt-0.5 shrink-0 text-muted-foreground">{icon}</span>}
+      <div className="min-w-0">
+        <p className="text-xs font-medium text-muted-foreground">{label}</p>
+        <p className="mt-0.5 truncate text-sm text-foreground">{value ?? "—"}</p>
+      </div>
     </div>
   );
 }
@@ -247,189 +263,217 @@ function EditOrderSheet({
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
       <SheetContent side="right" className="w-full overflow-y-auto sm:max-w-2xl">
-        <SheetHeader className="mb-6">
-          <SheetTitle>Editar orden</SheetTitle>
+        <SheetHeader className="border-b pb-4 mb-6">
+          <SheetTitle className="text-lg font-semibold">Editar orden</SheetTitle>
         </SheetHeader>
 
-        <form onSubmit={handleSubmit((v) => mutation.mutate(v))} className="space-y-6 pb-10">
-          {/* Status & priority */}
-          <section className="space-y-4">
-            <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Estado y prioridad</p>
-            <div className="grid grid-cols-2 gap-3">
-              <div className="space-y-1">
-                <Label>Estado</Label>
+        <form onSubmit={handleSubmit((v) => mutation.mutate(v))} className="space-y-4 pb-10">
+
+          {/* ── Estado y prioridad ──────────────────────────────────────── */}
+          <Card>
+            <CardHeader className="pb-3">
+              <CardTitle className="text-sm font-semibold">Estado y prioridad</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="grid grid-cols-2 gap-3">
+                <div className="space-y-1">
+                  <Label>Estado</Label>
+                  <Controller
+                    control={control}
+                    name="currentStatus"
+                    render={({ field }) => (
+                      <Select value={field.value ?? ""} onValueChange={field.onChange}>
+                        <SelectTrigger>
+                          <SelectValue>{field.value ? STATUS_LABELS[field.value as ReportStatus] : "Estado"}</SelectValue>
+                        </SelectTrigger>
+                        <SelectContent>
+                          {(Object.keys(STATUS_LABELS) as ReportStatus[]).map((s) => (
+                            <SelectItem key={s} value={s}>{STATUS_LABELS[s]}</SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    )}
+                  />
+                </div>
+                <div className="space-y-1">
+                  <Label>Prioridad</Label>
+                  <Controller
+                    control={control}
+                    name="priority"
+                    render={({ field }) => (
+                      <Select value={field.value ?? ""} onValueChange={field.onChange}>
+                        <SelectTrigger>
+                          <SelectValue>{field.value ? PRIORITY_LABELS[field.value as Priority] : "Prioridad"}</SelectValue>
+                        </SelectTrigger>
+                        <SelectContent>
+                          {(["LOW", "NORMAL", "HIGH", "URGENT"] as Priority[]).map((p) => (
+                            <SelectItem key={p} value={p}>{PRIORITY_LABELS[p]}</SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    )}
+                  />
+                </div>
+              </div>
+              <div className="flex items-center gap-2">
+                <input type="checkbox" id="isUrgent" {...register("isUrgent")} className="h-4 w-4 rounded border-border" />
+                <Label htmlFor="isUrgent" className="cursor-pointer font-normal">Marcar como urgente</Label>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* ── Técnico y fechas ─────────────────────────────────────────── */}
+          <Card>
+            <CardHeader className="pb-3">
+              <CardTitle className="text-sm font-semibold">Técnico y fechas</CardTitle>
+            </CardHeader>
+            <CardContent className="grid grid-cols-2 gap-3">
+              <div className="space-y-1 col-span-2 sm:col-span-1">
+                <Label>Técnico asignado</Label>
                 <Controller
                   control={control}
-                  name="currentStatus"
+                  name="technicianId"
                   render={({ field }) => (
-                    <Select value={field.value ?? ""} onValueChange={field.onChange}>
-                      <SelectTrigger><SelectValue placeholder="Estado" /></SelectTrigger>
+                    <Select value={field.value ?? "none"} onValueChange={field.onChange}>
+                      <SelectTrigger>
+                        <SelectValue>
+                          {!field.value || field.value === "none"
+                            ? "Sin asignar"
+                            : (() => { const t = technicians.find((u) => String(u.id) === field.value); return t ? `${t.firstName} ${t.lastName}` : "Cargando…"; })()}
+                        </SelectValue>
+                      </SelectTrigger>
                       <SelectContent>
-                        {(Object.keys(STATUS_LABELS) as ReportStatus[]).map((s) => (
-                          <SelectItem key={s} value={s}>{STATUS_LABELS[s]}</SelectItem>
+                        <SelectItem value="none">Sin asignar</SelectItem>
+                        {technicians.map((t) => (
+                          <SelectItem key={String(t.id)} value={String(t.id)}>
+                            {t.firstName} {t.lastName}
+                          </SelectItem>
                         ))}
                       </SelectContent>
                     </Select>
                   )}
                 />
               </div>
-              <div className="space-y-1">
-                <Label>Prioridad</Label>
-                <Controller
-                  control={control}
-                  name="priority"
-                  render={({ field }) => (
-                    <Select value={field.value ?? ""} onValueChange={field.onChange}>
-                      <SelectTrigger><SelectValue placeholder="Prioridad" /></SelectTrigger>
-                      <SelectContent>
-                        {(["LOW","NORMAL","HIGH","URGENT"] as Priority[]).map((p) => (
-                          <SelectItem key={p} value={p}>{PRIORITY_LABELS[p]}</SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  )}
-                />
+              <div className="space-y-1 col-span-2 sm:col-span-1">
+                <Label>Entrega estimada</Label>
+                <Input type="date" {...register("estimatedDeliveryDate")} />
               </div>
-            </div>
-            <div className="flex items-center gap-2">
-              <input type="checkbox" id="isUrgent" {...register("isUrgent")} className="h-4 w-4 rounded" />
-              <Label htmlFor="isUrgent" className="cursor-pointer font-normal">Urgente</Label>
-            </div>
-          </section>
+            </CardContent>
+          </Card>
 
-          <Separator />
+          {/* ── Diagnóstico y reparación ─────────────────────────────────── */}
+          <Card>
+            <CardHeader className="pb-3">
+              <CardTitle className="text-sm font-semibold">Diagnóstico y reparación</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-3">
+              <div className="space-y-1">
+                <Label>Problema reportado</Label>
+                <Textarea {...register("reportedIssue")} rows={2} />
+              </div>
+              <div className="space-y-1">
+                <Label>Diagnóstico técnico</Label>
+                <Textarea {...register("technicalDiagnosis")} rows={2} />
+              </div>
+              <div className="space-y-1">
+                <Label>Reparación realizada</Label>
+                <Textarea {...register("repairPerformed")} rows={2} />
+              </div>
+              <div className="grid grid-cols-2 gap-3">
+                <div className="space-y-1">
+                  <Label>Estado de entrada</Label>
+                  <Input {...register("entryCondition")} placeholder="Ej: pantalla rota" />
+                </div>
+                <div className="space-y-1">
+                  <Label>Estado de salida</Label>
+                  <Controller
+                    control={control}
+                    name="exitCondition"
+                    render={({ field }) => (
+                      <Select value={field.value ?? ""} onValueChange={field.onChange}>
+                        <SelectTrigger>
+                          <SelectValue>{field.value ? { REPAIRED: "Reparado", PARTIALLY_REPAIRED: "Parcialmente reparado", NOT_REPAIRED: "No reparado", CLIENT_NOT_AUTHORIZED: "Cliente no autoriza", IRREPARABLE: "Irreparable" }[field.value] ?? "—" : "—"}</SelectValue>
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="REPAIRED">Reparado</SelectItem>
+                          <SelectItem value="PARTIALLY_REPAIRED">Parcialmente reparado</SelectItem>
+                          <SelectItem value="NOT_REPAIRED">No reparado</SelectItem>
+                          <SelectItem value="CLIENT_NOT_AUTHORIZED">Cliente no autoriza</SelectItem>
+                          <SelectItem value="IRREPARABLE">Irreparable</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    )}
+                  />
+                </div>
+              </div>
+            </CardContent>
+          </Card>
 
-          {/* Problem & repair */}
-          <section className="space-y-3">
-            <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Diagnóstico y reparación</p>
-            <div className="space-y-1">
-              <Label>Problema reportado</Label>
-              <Textarea {...register("reportedIssue")} rows={2} />
-            </div>
-            <div className="space-y-1">
-              <Label>Diagnóstico técnico</Label>
-              <Textarea {...register("technicalDiagnosis")} rows={2} />
-            </div>
-            <div className="space-y-1">
-              <Label>Reparación realizada</Label>
-              <Textarea {...register("repairPerformed")} rows={2} />
-            </div>
-            <div className="grid grid-cols-2 gap-3">
-              <div className="space-y-1">
-                <Label>Estado de entrada</Label>
-                <Input {...register("entryCondition")} />
+          {/* ── Costes y facturación ─────────────────────────────────────── */}
+          <Card>
+            <CardHeader className="pb-3">
+              <CardTitle className="text-sm font-semibold">Costes y facturación</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-3">
+              <div className="grid grid-cols-2 gap-3">
+                <div className="space-y-1">
+                  <Label>Presupuesto inicial (€)</Label>
+                  <Input type="number" step="0.01" min="0" {...register("initialBudget")} />
+                </div>
+                <div className="space-y-1">
+                  <Label>Presupuesto final (€)</Label>
+                  <Input type="number" step="0.01" min="0" {...register("finalBudget")} />
+                </div>
+                <div className="space-y-1">
+                  <Label>Mano de obra (€)</Label>
+                  <Input type="number" step="0.01" min="0" {...register("laborCost")} />
+                </div>
+                <div className="space-y-1">
+                  <Label>Piezas (€)</Label>
+                  <Input type="number" step="0.01" min="0" {...register("partsCost")} />
+                </div>
+                <div className="space-y-1">
+                  <Label>Descuento (€)</Label>
+                  <Input type="number" step="0.01" min="0" {...register("discount")} />
+                </div>
               </div>
-              <div className="space-y-1">
-                <Label>Estado de salida</Label>
-                <Controller
-                  control={control}
-                  name="exitCondition"
-                  render={({ field }) => (
-                    <Select value={field.value ?? ""} onValueChange={field.onChange}>
-                      <SelectTrigger><SelectValue placeholder="—" /></SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="REPAIRED">Reparado</SelectItem>
-                        <SelectItem value="PARTIALLY_REPAIRED">Parcialmente reparado</SelectItem>
-                        <SelectItem value="NOT_REPAIRED">No reparado</SelectItem>
-                        <SelectItem value="CLIENT_NOT_AUTHORIZED">Cliente no autoriza</SelectItem>
-                        <SelectItem value="IRREPARABLE">Irreparable</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  )}
-                />
-              </div>
-            </div>
-          </section>
 
-          <Separator />
+              <Separator />
 
-          {/* Technician & dates */}
-          <section className="space-y-3">
-            <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Técnico y fechas</p>
-            <div className="space-y-1">
-              <Label>Técnico asignado</Label>
-              <Controller
-                control={control}
-                name="technicianId"
-                render={({ field }) => (
-                  <Select value={field.value ?? "none"} onValueChange={field.onChange}>
-                    <SelectTrigger><SelectValue placeholder="Sin asignar" /></SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="none">Sin asignar</SelectItem>
-                      {technicians.map((t) => (
-                        <SelectItem key={String(t.id)} value={String(t.id)}>
-                          {t.firstName} {t.lastName}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                )}
-              />
-            </div>
-            <div className="space-y-1">
-              <Label>Entrega estimada</Label>
-              <Input type="date" {...register("estimatedDeliveryDate")} />
-            </div>
-          </section>
+              <div className="grid grid-cols-2 gap-3">
+                <div className="space-y-1">
+                  <Label>Estado de pago</Label>
+                  <Controller
+                    control={control}
+                    name="paymentStatus"
+                    render={({ field }) => (
+                      <Select value={field.value ?? ""} onValueChange={field.onChange}>
+                        <SelectTrigger>
+                          <SelectValue>{field.value ? PAYMENT_LABELS[field.value as PaymentStatus] : "—"}</SelectValue>
+                        </SelectTrigger>
+                        <SelectContent>
+                          {(["PENDING", "PARTIAL", "PAID", "REFUNDED"] as PaymentStatus[]).map((p) => (
+                            <SelectItem key={p} value={p}>{PAYMENT_LABELS[p]}</SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    )}
+                  />
+                </div>
+                <div className="space-y-1">
+                  <Label>Método de pago</Label>
+                  <Input {...register("paymentMethod")} placeholder="Efectivo, tarjeta…" />
+                </div>
+              </div>
+            </CardContent>
+          </Card>
 
-          <Separator />
-
-          {/* Budget & payment */}
-          <section className="space-y-3">
-            <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Costes y pago</p>
-            <div className="grid grid-cols-2 gap-3">
-              <div className="space-y-1">
-                <Label>Presupuesto inicial (€)</Label>
-                <Input type="number" step="0.01" min="0" {...register("initialBudget")} />
-              </div>
-              <div className="space-y-1">
-                <Label>Presupuesto final (€)</Label>
-                <Input type="number" step="0.01" min="0" {...register("finalBudget")} />
-              </div>
-              <div className="space-y-1">
-                <Label>Mano de obra (€)</Label>
-                <Input type="number" step="0.01" min="0" {...register("laborCost")} />
-              </div>
-              <div className="space-y-1">
-                <Label>Piezas (€)</Label>
-                <Input type="number" step="0.01" min="0" {...register("partsCost")} />
-              </div>
-              <div className="space-y-1">
-                <Label>Descuento (€)</Label>
-                <Input type="number" step="0.01" min="0" {...register("discount")} />
-              </div>
-            </div>
-            <div className="grid grid-cols-2 gap-3">
-              <div className="space-y-1">
-                <Label>Estado de pago</Label>
-                <Controller
-                  control={control}
-                  name="paymentStatus"
-                  render={({ field }) => (
-                    <Select value={field.value ?? ""} onValueChange={field.onChange}>
-                      <SelectTrigger><SelectValue placeholder="—" /></SelectTrigger>
-                      <SelectContent>
-                        {(["PENDING","PARTIAL","PAID","REFUNDED"] as PaymentStatus[]).map((p) => (
-                          <SelectItem key={p} value={p}>{PAYMENT_LABELS[p]}</SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  )}
-                />
-              </div>
-              <div className="space-y-1">
-                <Label>Método de pago</Label>
-                <Input {...register("paymentMethod")} placeholder="Efectivo, tarjeta…" />
-              </div>
-            </div>
-          </section>
-
-          <Separator />
-
-          {/* Warranty */}
-          <section className="space-y-3">
-            <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Garantía</p>
-            <div className="grid grid-cols-2 gap-3">
+          {/* ── Garantía ─────────────────────────────────────────────────── */}
+          <Card>
+            <CardHeader className="pb-3">
+              <CardTitle className="text-sm font-semibold">Garantía</CardTitle>
+            </CardHeader>
+            <CardContent className="grid grid-cols-2 gap-3">
               <div className="space-y-1">
                 <Label>Tipo de garantía</Label>
                 <Controller
@@ -437,7 +481,9 @@ function EditOrderSheet({
                   name="warrantyType"
                   render={({ field }) => (
                     <Select value={field.value ?? ""} onValueChange={field.onChange}>
-                      <SelectTrigger><SelectValue placeholder="—" /></SelectTrigger>
+                      <SelectTrigger>
+                        <SelectValue>{field.value ? WARRANTY_LABELS[field.value as WarrantyType] : "—"}</SelectValue>
+                      </SelectTrigger>
                       <SelectContent>
                         {(Object.keys(WARRANTY_LABELS) as WarrantyType[]).map((w) => (
                           <SelectItem key={w} value={w}>{WARRANTY_LABELS[w]}</SelectItem>
@@ -451,24 +497,27 @@ function EditOrderSheet({
                 <Label>Días de garantía</Label>
                 <Input type="number" min="0" {...register("warrantyDays")} />
               </div>
-            </div>
-          </section>
+            </CardContent>
+          </Card>
 
-          <Separator />
+          {/* ── Notas ────────────────────────────────────────────────────── */}
+          <Card>
+            <CardHeader className="pb-3">
+              <CardTitle className="text-sm font-semibold">Notas</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-3">
+              <div className="space-y-1">
+                <Label>Notas internas <span className="text-muted-foreground font-normal">(solo taller)</span></Label>
+                <Textarea {...register("internalNotes")} rows={2} />
+              </div>
+              <div className="space-y-1">
+                <Label>Notas para el cliente</Label>
+                <Textarea {...register("customerNotes")} rows={2} />
+              </div>
+            </CardContent>
+          </Card>
 
-          {/* Notes */}
-          <section className="space-y-3">
-            <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Notas</p>
-            <div className="space-y-1">
-              <Label>Notas internas (solo taller)</Label>
-              <Textarea {...register("internalNotes")} rows={2} />
-            </div>
-            <div className="space-y-1">
-              <Label>Notas para el cliente</Label>
-              <Textarea {...register("customerNotes")} rows={2} />
-            </div>
-          </section>
-
+          {/* ── Actions ──────────────────────────────────────────────────── */}
           <div className="flex justify-end gap-3 pt-2">
             <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
               Cancelar
@@ -546,7 +595,10 @@ interface ReportDetailProps {
 
 export function ReportDetail({ id }: ReportDetailProps) {
   const [editOpen, setEditOpen] = useState(false);
+  const [deliverOpen, setDeliverOpen] = useState(false);
   const queryClient = useQueryClient();
+  const printRef = useRef<HTMLDivElement>(null);
+  const handlePrint = useReactToPrint({ contentRef: printRef });
 
   const reportQuery = useQuery({
     queryKey: ["reports", id],
@@ -555,10 +607,17 @@ export function ReportDetail({ id }: ReportDetailProps) {
 
   if (reportQuery.isPending) {
     return (
-      <div className="space-y-4">
-        <Skeleton className="h-10 w-64" />
-        <Skeleton className="h-48 w-full" />
-        <Skeleton className="h-48 w-full" />
+      <div className="space-y-6">
+        <Skeleton className="h-28 w-full rounded-xl" />
+        <div className="grid gap-4 lg:grid-cols-2">
+          <Skeleton className="h-48 rounded-xl" />
+          <Skeleton className="h-48 rounded-xl" />
+        </div>
+        <div className="grid gap-4 lg:grid-cols-3">
+          <Skeleton className="h-64 rounded-xl lg:col-span-2" />
+          <Skeleton className="h-64 rounded-xl" />
+        </div>
+        <Skeleton className="h-32 rounded-xl" />
       </div>
     );
   }
@@ -610,57 +669,94 @@ export function ReportDetail({ id }: ReportDetailProps) {
 
   return (
     <div className="space-y-6">
-      {/* ── Action bar ────────────────────────────────────────────────────── */}
-      <div className="flex flex-wrap items-start justify-between gap-3">
-        <div>
-          <div className="flex flex-wrap items-center gap-2">
-            <h2 className="font-mono text-xl font-semibold text-foreground">
-              {report.orderNumber}
-            </h2>
-            {report.isUrgent && <Badge variant="destructive">Urgente</Badge>}
-            <Badge
-              variant="outline"
-              className={`text-xs ${STATUS_COLOR[report.currentStatus] ?? ""}`}
-            >
-              {STATUS_LABELS[report.currentStatus] ?? report.currentStatus}
-            </Badge>
-            <Badge
-              variant="outline"
-              className={`text-xs ${PAYMENT_COLOR[report.paymentStatus] ?? ""}`}
-            >
-              {PAYMENT_LABELS[report.paymentStatus] ?? report.paymentStatus}
-            </Badge>
+      {/* ── Header card ───────────────────────────────────────────────────── */}
+      <Card className="overflow-hidden">
+        <div className="h-2 bg-gradient-to-r from-primary/60 to-primary" />
+        <CardContent className="flex flex-wrap items-start justify-between gap-4 p-5">
+          {/* Left: order meta */}
+          <div className="space-y-2">
+            <div className="flex flex-wrap items-center gap-2">
+              <h2 className="font-mono text-xl font-semibold text-foreground">
+                {report.orderNumber}
+              </h2>
+              {report.isUrgent && <Badge variant="destructive">Urgente</Badge>}
+              <Badge variant="outline" className={cn("text-xs", STATUS_COLOR[report.currentStatus])}>
+                {STATUS_LABELS[report.currentStatus] ?? report.currentStatus}
+              </Badge>
+              <Badge variant="outline" className={cn("text-xs", PAYMENT_COLOR[report.paymentStatus])}>
+                {PAYMENT_LABELS[report.paymentStatus] ?? report.paymentStatus}
+              </Badge>
+              <Badge variant="secondary" className="text-xs">
+                {ORDER_TYPE_LABELS[report.reportType]}
+              </Badge>
+            </div>
+            <p className="text-sm text-muted-foreground">
+              Prioridad{" "}
+              <span className="font-medium text-foreground">{PRIORITY_LABELS[report.priority]}</span>
+              {" · "}Recibido el{" "}
+              <span className="font-medium text-foreground">
+                {fmtDate(report.receptionDate || report.createdAt)}
+              </span>
+              {report.estimatedDeliveryDate && (
+                <>
+                  {" · "}Entrega estimada{" "}
+                  <span className="font-medium text-foreground">
+                    {fmtDate(report.estimatedDeliveryDate)}
+                  </span>
+                </>
+              )}
+            </p>
+            {technician && (
+              <p className="flex items-center gap-1.5 text-xs text-muted-foreground">
+                <Wrench className="h-3.5 w-3.5" />
+                Técnico:{" "}
+                <span className="font-medium text-foreground">
+                  {technician.firstName} {technician.lastName}
+                </span>
+              </p>
+            )}
           </div>
-          <p className="mt-1 text-sm text-muted-foreground">
-            {ORDER_TYPE_LABELS[report.reportType]} · Prioridad {PRIORITY_LABELS[report.priority]} ·{" "}
-            Recibido el {fmtDate(report.receptionDate || report.createdAt)}
-          </p>
-        </div>
 
-        <div className="flex flex-wrap gap-2">
-          <Button variant="outline" size="sm" onClick={() => window.print()}>
-            <Printer className="h-3.5 w-3.5" />
-            Imprimir
-          </Button>
-          <Link
-            href={`/accounting/${report.id}`}
-            className={buttonVariants({ variant: "outline", size: "sm" })}
-          >
-            <Receipt className="h-3.5 w-3.5" />
-            Ver factura
-          </Link>
-          <Button size="sm" onClick={() => setEditOpen(true)}>
-            <Pencil className="h-3.5 w-3.5" />
-            Editar
-          </Button>
-        </div>
-      </div>
+          {/* Right: actions */}
+          <div className="flex flex-wrap gap-2">
+            <Button variant="outline" size="sm" onClick={() => handlePrint()}>
+              <Printer className="h-3.5 w-3.5" />
+              Imprimir
+            </Button>
+            <Link
+              href={`/accounting/${report.id}`}
+              className={buttonVariants({ variant: "outline", size: "sm" })}
+            >
+              <Receipt className="h-3.5 w-3.5" />
+              Factura
+            </Link>
+            <Button size="sm" onClick={() => setEditOpen(true)}>
+              <Pencil className="h-3.5 w-3.5" />
+              Editar
+            </Button>
+            {report.currentStatus === "READY_FOR_PICKUP" && (
+              <Button
+                size="sm"
+                className="bg-green-600 hover:bg-green-700 text-white"
+                onClick={() => setDeliverOpen(true)}
+              >
+                <PackageCheck className="h-3.5 w-3.5" />
+                Entregar
+              </Button>
+            )}
+          </div>
+        </CardContent>
+      </Card>
 
       {/* ── Customer + Device ─────────────────────────────────────────────── */}
       <div className="grid gap-4 lg:grid-cols-2">
+        {/* Customer */}
         <Card>
-          <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm">Cliente</CardTitle>
+          <CardHeader className="flex flex-row items-center justify-between pb-3">
+            <CardTitle className="flex items-center gap-2 text-sm">
+              <User className="h-4 w-4 text-muted-foreground" />
+              Cliente
+            </CardTitle>
             {customer && (
               <Link
                 href={`/customers/${customer.id}`}
@@ -671,19 +767,40 @@ export function ReportDetail({ id }: ReportDetailProps) {
               </Link>
             )}
           </CardHeader>
-          <CardContent className="grid grid-cols-2 gap-3">
+          <CardContent className="space-y-3">
             {customer ? (
               <>
                 <Field
-                  label="Nombre"
+                  label="Nombre completo"
                   value={`${customer.firstName} ${customer.lastName}${customer.secondLastName ? ` ${customer.secondLastName}` : ""}`}
+                  icon={<User className="h-3.5 w-3.5" />}
                 />
-                <Field label="Documento" value={`${customer.documentType} ${customer.document}`} />
-                <Field label="Teléfono" value={customer.phone1} />
-                <Field label="Email" value={customer.email} />
-                {(customer.city || customer.province) && (
-                  <Field label="Ciudad" value={[customer.city, customer.province].filter(Boolean).join(", ")} />
-                )}
+                <Separator />
+                <div className="grid grid-cols-2 gap-3">
+                  <Field label="Documento" value={`${customer.documentType} ${customer.document}`} />
+                  <Field
+                    label="Teléfono"
+                    value={customer.phone1}
+                    icon={<Phone className="h-3.5 w-3.5" />}
+                  />
+                  {customer.email && (
+                    <Field
+                      label="Email"
+                      value={
+                        <a href={`mailto:${customer.email}`} className="text-primary hover:underline">
+                          {customer.email}
+                        </a>
+                      }
+                    />
+                  )}
+                  {(customer.city || customer.province) && (
+                    <Field
+                      label="Ciudad / Provincia"
+                      value={[customer.city, customer.province].filter(Boolean).join(", ")}
+                      icon={<MapPin className="h-3.5 w-3.5" />}
+                    />
+                  )}
+                </div>
               </>
             ) : (
               <Field label="ID" value={String(report.customerId)} />
@@ -691,9 +808,13 @@ export function ReportDetail({ id }: ReportDetailProps) {
           </CardContent>
         </Card>
 
+        {/* Device */}
         <Card>
-          <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm">Dispositivo</CardTitle>
+          <CardHeader className="flex flex-row items-center justify-between pb-3">
+            <CardTitle className="flex items-center gap-2 text-sm">
+              <Smartphone className="h-4 w-4 text-muted-foreground" />
+              Dispositivo
+            </CardTitle>
             {device && (
               <Link
                 href={`/devices/${device.id}`}
@@ -704,18 +825,49 @@ export function ReportDetail({ id }: ReportDetailProps) {
               </Link>
             )}
           </CardHeader>
-          <CardContent className="grid grid-cols-2 gap-3">
+          <CardContent className="space-y-3">
             {device ? (
               <>
                 <Field
                   label="Marca / Modelo"
                   value={`${device.brand?.name ?? ""} ${device.model ?? ""}`.trim() || "—"}
+                  icon={<Smartphone className="h-3.5 w-3.5" />}
                 />
-                <Field label="IMEI entrada" value={device.imeiIn} />
-                <Field label="IMEI salida" value={device.imeiOut} />
-                <Field label="Nº Serie" value={device.serialNumber} />
-                <Field label="Pantalla" value={device.screenCondition} />
-                <Field label="Carcasa" value={device.caseCondition} />
+                <Separator />
+                <div className="grid grid-cols-2 gap-3">
+                  <Field label="IMEI entrada" value={device.imeiIn} />
+                  <Field label="IMEI salida" value={device.imeiOut} />
+                  <Field label="Nº Serie" value={device.serialNumber} />
+                  <Field label="Estado pantalla" value={device.screenCondition} />
+                  <Field label="Estado carcasa" value={device.caseCondition} />
+                  {device.dents && <Field label="Golpes" value={device.dents} />}
+                  {device.scratches && <Field label="Arañazos" value={device.scratches} />}
+                </div>
+                {/* Accessories */}
+                <Separator />
+                <div className="flex flex-wrap gap-1.5">
+                  {[
+                    device.hasSimCard && "SIM",
+                    device.hasSdCard && "SD",
+                    device.hasCharger && "Cargador",
+                    device.hasBackCover && "Tapa",
+                    device.hasBattery && "Batería",
+                  ]
+                    .filter(Boolean)
+                    .map((acc) => (
+                      <span
+                        key={String(acc)}
+                        className="rounded bg-muted px-2 py-0.5 text-xs text-muted-foreground"
+                      >
+                        {acc}
+                      </span>
+                    ))}
+                  {device.otherAccessories && (
+                    <span className="rounded bg-muted px-2 py-0.5 text-xs text-muted-foreground">
+                      {device.otherAccessories}
+                    </span>
+                  )}
+                </div>
               </>
             ) : (
               <Field label="ID" value={String(report.deviceId)} />
@@ -724,61 +876,102 @@ export function ReportDetail({ id }: ReportDetailProps) {
         </Card>
       </div>
 
-      {/* ── Diagnosis & repair ────────────────────────────────────────────── */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-sm">Diagnóstico y reparación</CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-3">
-          <Field label="Problema reportado" value={report.reportedIssue} />
-          <Field label="Diagnóstico técnico" value={report.technicalDiagnosis} />
-          <Field label="Reparación realizada" value={report.repairPerformed} />
-          <div className="grid grid-cols-2 gap-3">
-            <Field label="Estado de entrada" value={report.entryCondition} />
-            <Field label="Estado de salida" value={report.exitCondition} />
-          </div>
-          {technician && (
-            <Field label="Técnico" value={`${technician.firstName} ${technician.lastName}`} />
-          )}
-        </CardContent>
-      </Card>
+      {/* ── Diagnosis & repair + Dates (side-by-side on lg) ───────────────── */}
+      <div className="grid gap-4 lg:grid-cols-3">
+        {/* Diagnosis */}
+        <Card className="lg:col-span-2">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2 text-sm">
+              <Wrench className="h-4 w-4 text-muted-foreground" />
+              Diagnóstico y reparación
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <Field label="Problema reportado" value={report.reportedIssue} />
+            <Separator />
+            <Field label="Diagnóstico técnico" value={report.technicalDiagnosis} />
+            <Separator />
+            <Field label="Reparación realizada" value={report.repairPerformed} />
+            <Separator />
+            <div className="grid grid-cols-2 gap-3">
+              <Field label="Estado de entrada" value={report.entryCondition} />
+              <Field
+                label="Estado de salida"
+                value={
+                  report.exitCondition
+                    ? {
+                        REPAIRED: "Reparado",
+                        PARTIALLY_REPAIRED: "Parcialmente reparado",
+                        NOT_REPAIRED: "No reparado",
+                        CLIENT_NOT_AUTHORIZED: "Cliente no autoriza",
+                        IRREPARABLE: "Irreparable",
+                      }[report.exitCondition] ?? report.exitCondition
+                    : undefined
+                }
+              />
+            </div>
+          </CardContent>
+        </Card>
 
-      {/* ── Dates ─────────────────────────────────────────────────────────── */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-sm">Fechas</CardTitle>
-        </CardHeader>
-        <CardContent className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-          <Field label="Recepción" value={fmtDate(report.receptionDate)} />
-          <Field label="Entrega estimada" value={fmtDate(report.estimatedDeliveryDate)} />
-          <Field label="Reparación" value={fmtDate(report.repairDate)} />
-          <Field label="Entrega real" value={fmtDate(report.deliveryDate)} />
-        </CardContent>
-      </Card>
+        {/* Dates */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2 text-sm">
+              <CalendarClock className="h-4 w-4 text-muted-foreground" />
+              Fechas
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-3">
+            <Field label="Recepción" value={fmtDate(report.receptionDate)} />
+            <Separator />
+            <Field label="Entrega estimada" value={fmtDate(report.estimatedDeliveryDate)} />
+            <Separator />
+            <Field label="Reparación" value={fmtDate(report.repairDate)} />
+            <Separator />
+            <Field label="Entrega real" value={fmtDate(report.deliveryDate)} />
+            {report.cancellationDate && (
+              <>
+                <Separator />
+                <Field label="Cancelación" value={fmtDate(report.cancellationDate)} />
+              </>
+            )}
+          </CardContent>
+        </Card>
+      </div>
 
       {/* ── Costs ─────────────────────────────────────────────────────────── */}
       <Card>
         <CardHeader>
-          <CardTitle className="text-sm">Costes y pago</CardTitle>
+          <CardTitle className="flex items-center gap-2 text-sm">
+            <Receipt className="h-4 w-4 text-muted-foreground" />
+            Costes y pago
+          </CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
-            <Field label="Presupuesto inicial" value={fmt(report.initialBudget)} />
-            <Field label="Presupuesto final" value={fmt(report.finalBudget)} />
-            <Field label="Mano de obra" value={fmt(report.laborCost)} />
-            <Field label="Piezas" value={fmt(report.partsCost)} />
-            <Field label="Descuento" value={fmt(report.discount)} />
-            <Field
-              label="Total"
-              value={
-                <span className="font-semibold text-primary">
-                  {fmt(report.total ?? report.finalBudget)}
-                </span>
-              }
-            />
+          <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-6">
+            {[
+              { label: "Pres. inicial", value: fmt(report.initialBudget) },
+              { label: "Pres. final", value: fmt(report.finalBudget) },
+              { label: "Mano de obra", value: fmt(report.laborCost) },
+              { label: "Piezas", value: fmt(report.partsCost) },
+              { label: "Descuento", value: fmt(report.discount) },
+              {
+                label: "Total",
+                value: (
+                  <span className="text-lg font-bold text-primary">
+                    {fmt(report.total ?? report.finalBudget)}
+                  </span>
+                ),
+              },
+            ].map(({ label, value }) => (
+              <div key={label} className="rounded-lg bg-muted/40 p-3 text-center">
+                <p className="text-xs text-muted-foreground">{label}</p>
+                <p className="mt-1 text-sm font-semibold text-foreground">{value}</p>
+              </div>
+            ))}
           </div>
-          <Separator className="my-3" />
-          <div className="grid grid-cols-2 gap-3">
+          <Separator className="my-4" />
+          <div className="flex flex-wrap gap-4">
             <Field label="Estado de pago" value={PAYMENT_LABELS[report.paymentStatus]} />
             <Field label="Método de pago" value={report.paymentMethod} />
           </div>
@@ -792,23 +985,23 @@ export function ReportDetail({ id }: ReportDetailProps) {
             <CardTitle className="text-sm">Repuestos utilizados</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="overflow-x-auto">
+            <div className="overflow-x-auto rounded-xl border">
               <table className="w-full text-sm">
                 <thead>
-                  <tr className="border-b text-left text-xs text-muted-foreground">
-                    <th className="pb-2 pr-4 font-medium">Repuesto</th>
-                    <th className="pb-2 pr-4 font-medium">Cant.</th>
-                    <th className="pb-2 pr-4 font-medium">P. unit.</th>
-                    <th className="pb-2 font-medium">Total</th>
+                  <tr className="bg-muted/40 text-left text-xs text-muted-foreground">
+                    <th className="px-3 py-2 font-medium">Repuesto</th>
+                    <th className="px-3 py-2 font-medium">Cant.</th>
+                    <th className="px-3 py-2 font-medium">P. unit.</th>
+                    <th className="px-3 py-2 font-medium">Total</th>
                   </tr>
                 </thead>
                 <tbody>
                   {report.parts.map((p) => (
-                    <tr key={p.id} className="border-b last:border-0">
-                      <td className="py-2 pr-4">{p.name}</td>
-                      <td className="py-2 pr-4">{p.quantity}</td>
-                      <td className="py-2 pr-4">{fmt(p.unitPrice)}</td>
-                      <td className="py-2 font-medium">{fmt(p.quantity * p.unitPrice)}</td>
+                    <tr key={p.id} className="border-t">
+                      <td className="px-3 py-2">{p.name}</td>
+                      <td className="px-3 py-2">{p.quantity}</td>
+                      <td className="px-3 py-2">{fmt(p.unitPrice)}</td>
+                      <td className="px-3 py-2 font-medium">{fmt(p.quantity * p.unitPrice)}</td>
                     </tr>
                   ))}
                 </tbody>
@@ -822,14 +1015,47 @@ export function ReportDetail({ id }: ReportDetailProps) {
       {report.warrantyType && report.warrantyType !== "NO_WARRANTY" && (
         <Card>
           <CardHeader>
-            <CardTitle className="text-sm">Garantía</CardTitle>
+            <CardTitle className="flex items-center gap-2 text-sm">
+              <ShieldCheck className="h-4 w-4 text-muted-foreground" />
+              Garantía
+            </CardTitle>
           </CardHeader>
-          <CardContent className="grid grid-cols-2 gap-3">
+          <CardContent className="grid grid-cols-2 gap-3 sm:grid-cols-3">
             <Field label="Tipo" value={WARRANTY_LABELS[report.warrantyType]} />
             <Field label="Días" value={report.warrantyDays != null ? String(report.warrantyDays) : undefined} />
             <Field label="Vence" value={fmtDate(report.warrantyEndDate)} />
           </CardContent>
         </Card>
+      )}
+
+      {/* ── Notes ─────────────────────────────────────────────────────────── */}
+      {(report.internalNotes || report.customerNotes) && (
+        <div className="grid gap-4 lg:grid-cols-2">
+          {report.internalNotes && (
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-sm">Notas internas (solo taller)</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p className="whitespace-pre-wrap text-sm leading-relaxed text-foreground">
+                  {report.internalNotes}
+                </p>
+              </CardContent>
+            </Card>
+          )}
+          {report.customerNotes && (
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-sm">Notas para el cliente</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p className="whitespace-pre-wrap text-sm leading-relaxed text-foreground">
+                  {report.customerNotes}
+                </p>
+              </CardContent>
+            </Card>
+          )}
+        </div>
       )}
 
       {/* ── Signature documents ───────────────────────────────────────────── */}
@@ -847,30 +1073,17 @@ export function ReportDetail({ id }: ReportDetailProps) {
         </Card>
       )}
 
-      {/* ── Notes ─────────────────────────────────────────────────────────── */}
-      {(report.internalNotes || report.customerNotes) && (
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-sm">Notas</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-3">
-            {report.internalNotes && (
-              <div>
-                <p className="text-xs font-medium text-muted-foreground">Internas (solo taller)</p>
-                <p className="mt-1 whitespace-pre-wrap text-sm">{report.internalNotes}</p>
-              </div>
-            )}
-            {report.customerNotes && (
-              <div>
-                <p className="text-xs font-medium text-muted-foreground">Para el cliente</p>
-                <p className="mt-1 whitespace-pre-wrap text-sm">{report.customerNotes}</p>
-              </div>
-            )}
-          </CardContent>
-        </Card>
+      {deliverOpen && (
+        <DeliveryModal
+          report={report}
+          onSuccess={() => {
+            setDeliverOpen(false);
+            queryClient.invalidateQueries({ queryKey: ["reports", id] });
+          }}
+          onClose={() => setDeliverOpen(false)}
+        />
       )}
 
-      {/* ── Edit sheet ────────────────────────────────────────────────────── */}
       {editOpen && (
         <EditOrderSheet
           reportId={report.id}
@@ -880,6 +1093,11 @@ export function ReportDetail({ id }: ReportDetailProps) {
           onSaved={() => queryClient.invalidateQueries({ queryKey: ["reports", id] })}
         />
       )}
+
+      {/* ── Hidden print layout ───────────────────────────────────────────── */}
+      <div className="hidden">
+        <ReportPrintView ref={printRef} report={report} />
+      </div>
     </div>
   );
 }

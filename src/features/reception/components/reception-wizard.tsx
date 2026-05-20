@@ -8,6 +8,7 @@ import { toast } from "sonner";
 import { useForm, Controller, useWatch } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
+import { useReactToPrint } from "react-to-print";
 
 import { Button, buttonVariants } from "@/components/ui/button";
 import { SignaturePad, type SignaturePadHandle } from "@/components/shared/signature-pad";
@@ -84,6 +85,8 @@ export function ReceptionWizard() {
   const [pendingOrderData, setPendingOrderData] = useState<OrderFormValues | null>(null);
   const [signatureDataUrl, setSignatureDataUrl] = useState<string | null>(null);
   const receptionPadRef = useRef<SignaturePadHandle>(null);
+  const receiptPrintRef = useRef<HTMLDivElement>(null);
+  const handlePrintReceipt = useReactToPrint({ contentRef: receiptPrintRef });
 
   // Devices for the selected customer
   const devicesQuery = useQuery({
@@ -703,6 +706,7 @@ export function ReceptionWizard() {
               </div>
             </CardHeader>
             <CardContent className="space-y-5 pt-5">
+              <div ref={receiptPrintRef} className="print-doc-root space-y-5">
               {/* Customer */}
               <div>
                 <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-muted-foreground">Cliente</p>
@@ -785,12 +789,13 @@ export function ReceptionWizard() {
                   </div>
                 </div>
               )}
+            </div>
             </CardContent>
           </Card>
 
           {/* Actions */}
           <div className="flex gap-3">
-            <Button variant="outline" onClick={() => window.print()}>
+            <Button variant="outline" onClick={() => handlePrintReceipt()}>
               <Printer className="h-4 w-4" />
               Imprimir
             </Button>

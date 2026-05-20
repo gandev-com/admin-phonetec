@@ -11,8 +11,9 @@ import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { StatusBadge, STATUS_LABELS } from "@/components/reports/status-badge";
+import { DeliveryModal } from "@/features/delivery/components/delivery-modal";
 import { reportsApi } from "@/lib/api/reports";
-import type { PaymentStatus, ReportStatus } from "@/types/report";
+import type { PaymentStatus, Report, ReportStatus } from "@/types/report";
 
 const PAGE_SIZE = 20;
 
@@ -38,6 +39,7 @@ export function ReportsTable() {
   const [statusFilter, setStatusFilter] = useState<ReportStatus | "">("");
   const [urgentOnly, setUrgentOnly] = useState(false);
   const [page, setPage] = useState(1);
+  const [deliveryReport, setDeliveryReport] = useState<Report | null>(null);
 
   useEffect(() => {
     const t = setTimeout(() => {
@@ -67,7 +69,8 @@ export function ReportsTable() {
   const totalPages = reportsQuery.data?.meta.totalPages ?? 1;
 
   return (
-    <Card>
+    <>
+      <Card>
       <CardHeader className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <CardTitle>Órdenes de reparación</CardTitle>
         <div className="flex flex-col gap-2 sm:flex-row">
@@ -181,12 +184,23 @@ export function ReportsTable() {
                         {new Date(report.createdAt).toLocaleDateString("es-ES")}
                       </TableCell>
                       <TableCell>
-                        <Link
-                          href={`/reports/${report.id}`}
-                          className={buttonVariants({ variant: "outline", size: "sm" })}
-                        >
-                          Ver
-                        </Link>
+                        <div className="flex items-center gap-2">
+                          {report.currentStatus === "READY_FOR_PICKUP" && (
+                            <button
+                              type="button"
+                              onClick={() => setDeliveryReport(report)}
+                              className="rounded-lg bg-green-600 px-2.5 py-1 text-xs font-medium text-white hover:bg-green-700"
+                            >
+                              Entregar
+                            </button>
+                          )}
+                          <Link
+                            href={`/reports/${report.id}`}
+                            className={buttonVariants({ variant: "outline", size: "sm" })}
+                          >
+                            Ver
+                          </Link>
+                        </div>
                       </TableCell>
                     </TableRow>
                   ))}
@@ -197,5 +211,14 @@ export function ReportsTable() {
         ) : null}
       </CardContent>
     </Card>
+
+    {deliveryReport && (
+      <DeliveryModal
+        report={deliveryReport}
+        onSuccess={() => setDeliveryReport(null)}
+        onClose={() => setDeliveryReport(null)}
+      />
+    )}
+    </>
   );
 }

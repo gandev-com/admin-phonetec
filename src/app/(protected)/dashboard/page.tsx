@@ -1,4 +1,5 @@
 import { KPIStrip }          from '@/components/dashboard/kpi-strip'
+import { QuickAccessGrid }   from '@/components/dashboard/quick-access-grid'
 import { UrgentAlert }       from '@/components/dashboard/urgent-alert'
 import { ActiveOrdersBoard } from '@/components/dashboard/active-orders-board'
 import { RecentFeed }        from '@/components/dashboard/recent-feed'
@@ -11,6 +12,9 @@ export default function DashboardPage() {
 
       {/* KPI row */}
       <KPIStrip />
+
+      {/* Quick access */}
+      <QuickAccessGrid />
 
       {/* Main grid */}
       <div className="grid grid-cols-1 gap-5 xl:grid-cols-3">

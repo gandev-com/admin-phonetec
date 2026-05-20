@@ -57,12 +57,17 @@ export function DeviceForm({ customerId, defaultValues, deviceId }: DeviceFormPr
 
   const onSubmit = async (data: CreateDeviceFormValues) => {
     try {
+      const payload = {
+        ...data,
+        imeiIn: data.imeiIn || undefined,
+        imeiOut: data.imeiOut || undefined,
+      };
       if (deviceId) {
-        await updateMutation.mutateAsync(data);
+        await updateMutation.mutateAsync(payload);
         toast.success("Dispositivo actualizado");
         router.push(`/devices/${deviceId}`);
       } else {
-        const device = await createMutation.mutateAsync(data);
+        const device = await createMutation.mutateAsync(payload);
         toast.success("Dispositivo registrado");
         router.push(`/devices/${String(device.id)}`);
       }
@@ -104,7 +109,7 @@ export function DeviceForm({ customerId, defaultValues, deviceId }: DeviceFormPr
               name="imeiIn"
               render={({ field }) => (
                 <ImeiInput
-                  label="IMEI entrada"
+                  label="IMEI entrada (opcional)"
                   value={field.value ?? ""}
                   onChange={field.onChange}
                   error={errors.imeiIn?.message}
@@ -116,7 +121,7 @@ export function DeviceForm({ customerId, defaultValues, deviceId }: DeviceFormPr
               name="imeiOut"
               render={({ field }) => (
                 <ImeiInput
-                  label="IMEI salida (si dual SIM)"
+                  label="IMEI salida (opcional, dual SIM)"
                   value={field.value ?? ""}
                   onChange={field.onChange}
                   error={errors.imeiOut?.message}

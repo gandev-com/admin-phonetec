@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import Link from 'next/link'
-import { Plus, ClipboardList, Users, Package, X } from 'lucide-react'
+import { ClipboardList, Columns3, Package, PackageCheck, Plus, Users, X } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
 const actions = [
@@ -13,8 +13,20 @@ const actions = [
     color: 'bg-brand-600 hover:bg-brand-700',
   },
   {
+    href:  '/delivery',
+    label: 'Entregas',
+    icon:  PackageCheck,
+    color: 'bg-green-600 hover:bg-green-700',
+  },
+  {
+    href:  '/orders',
+    label: 'Kanban',
+    icon:  Columns3,
+    color: 'bg-violet-600 hover:bg-violet-700',
+  },
+  {
     href:  '/customers',
-    label: 'Ver clientes',
+    label: 'Clientes',
     icon:  Users,
     color: 'bg-emerald-600 hover:bg-emerald-700',
   },
@@ -40,15 +52,20 @@ export function QuickActions() {
       >
         {actions.map(({ href, label, icon: Icon, color }) => (
           <Link key={href} href={href} onClick={() => setOpen(false)}>
-            <button
-              aria-label={label}
-              className={cn(
-                'flex h-10 w-10 items-center justify-center rounded-full text-white shadow-lg transition-all',
-                color,
-              )}
-            >
-              <Icon className="h-4 w-4" />
-            </button>
+            <div className="flex items-center gap-2">
+              <span className="rounded-lg bg-white px-2.5 py-1 text-xs font-medium text-surface-900 shadow-md">
+                {label}
+              </span>
+              <button
+                aria-label={label}
+                className={cn(
+                  'flex h-10 w-10 items-center justify-center rounded-full text-white shadow-lg transition-all',
+                  color,
+                )}
+              >
+                <Icon className="h-4 w-4" />
+              </button>
+            </div>
           </Link>
         ))}
       </div>

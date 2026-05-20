@@ -4,6 +4,7 @@ import { use } from "react";
 
 import { DeviceForm } from "@/features/devices/components/device-form";
 import { useDevice } from "@/features/devices/hooks/use-devices";
+import { BackButton } from "@/components/shared/back-button";
 import type { CreateDeviceFormValues } from "@/lib/schemas/device";
 
 interface EditDevicePageProps {
@@ -24,11 +25,14 @@ export default function EditDevicePage({ params }: EditDevicePageProps) {
 
   return (
     <div className="mx-auto max-w-3xl space-y-6">
-      <div>
-        <h1 className="text-2xl font-bold">Editar dispositivo</h1>
-        <p className="text-muted-foreground">
-          {device.brand?.name} {device.model}
-        </p>
+      <div className="flex items-center gap-3">
+        <BackButton fallback={`/devices/${id}`} />
+        <div>
+          <h1 className="text-2xl font-bold">Editar dispositivo</h1>
+          <p className="text-muted-foreground">
+            {device.brand?.name} {device.model}
+          </p>
+        </div>
       </div>
       <DeviceForm
         customerId={String(device.customerId)}

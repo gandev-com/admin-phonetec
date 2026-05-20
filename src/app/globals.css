@@ -212,3 +212,41 @@
   from { transform: translateY(8px); opacity: 0; }
   to   { transform: translateY(0);   opacity: 1; }
 }
+
+/* ─── Print / PDF styles ─────────────────────────────────────────────────── */
+@media print {
+  @page {
+    size: A4;
+    margin: 1.5cm 1.8cm;
+  }
+
+  html, body {
+    background: #fff !important;
+    color: #0f172a !important;
+    font-size: 11pt;
+  }
+
+  /* Layout: reset overflow so the full page renders */
+  .print-doc-root {
+    display: block !important;
+    overflow: visible !important;
+    width: 100% !important;
+    height: auto !important;
+    max-height: none !important;
+    background: #fff !important;
+    padding: 0 !important;
+    margin: 0 !important;
+  }
+
+  /* Avoid page breaks inside key blocks */
+  .print-no-break {
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+
+  /* Force colors/backgrounds to print */
+  * {
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+}

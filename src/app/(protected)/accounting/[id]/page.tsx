@@ -1,14 +1,16 @@
 "use client";
 
-import { use } from "react";
+import { use, useRef } from "react";
 import { useQuery } from "@tanstack/react-query";
 import Link from "next/link";
 import { ArrowLeft, ClipboardList, Download, ExternalLink, FileSignature, Printer } from "lucide-react";
+import { useReactToPrint } from "react-to-print";
 
 import { Badge } from "@/components/ui/badge";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { Skeleton } from "@/components/ui/skeleton";
+import { BackButton } from "@/components/shared/back-button";
 import { reportsApi } from "@/lib/api/reports";
 import { API_URL } from "@/lib/api/client";
 import type { ConsentDocument, PaymentStatus } from "@/types/report";
@@ -63,6 +65,8 @@ export default function InvoiceDetailPage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = use(params);
+  const invoiceRef = useRef<HTMLDivElement>(null);
+  const handlePrint = useReactToPrint({ contentRef: invoiceRef });
 
   const { data: report, isPending, isError } = useQuery({
     queryKey: ["report", id],
@@ -77,12 +81,7 @@ export default function InvoiceDetailPage({
     <section className="space-y-6">
       {/* Nav */}
       <div className="flex flex-wrap items-center justify-between gap-2 print:hidden">
-        <Link href="/accounting">
-          <Button variant="outline" size="sm">
-            <ArrowLeft className="h-3.5 w-3.5" />
-            Volver
-          </Button>
-        </Link>
+        <BackButton fallback="/accounting" />
         <div className="flex flex-wrap gap-2">
           {report && (
             <Link
@@ -93,7 +92,7 @@ export default function InvoiceDetailPage({
               Ver orden
             </Link>
           )}
-          <Button variant="outline" size="sm" onClick={() => window.print()}>
+          <Button variant="outline" size="sm" onClick={() => handlePrint()}>
             <Printer className="h-3.5 w-3.5" />
             Imprimir / PDF
           </Button>
@@ -115,7 +114,7 @@ export default function InvoiceDetailPage({
       )}
 
       {report && (
-        <div className="rounded-2xl border border-border bg-card shadow-sm print:border-none print:shadow-none">
+        <div ref={invoiceRef} className="print-doc-root rounded-2xl border border-border bg-card shadow-sm">
           {/* Invoice header */}
           <div className="flex flex-col gap-6 border-b border-border px-8 py-8 sm:flex-row sm:items-start sm:justify-between">
             {/* Brand */}

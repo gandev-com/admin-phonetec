@@ -2,12 +2,13 @@
 
 import { use } from "react";
 import Link from "next/link";
-import { ArrowLeft, Pencil } from "lucide-react";
+import { Pencil } from "lucide-react";
 
 import { Badge } from "@/components/ui/badge";
 import { buttonVariants } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { BackButton } from "@/components/shared/back-button";
 import { DeviceImagesGallery } from "@/features/devices/components/device-images-gallery";
 import { useDevice } from "@/features/devices/hooks/use-devices";
 
@@ -38,9 +39,7 @@ export default function DeviceDetailPage({ params }: DeviceDetailPageProps) {
     <div className="mx-auto max-w-4xl space-y-6">
       {/* Cabecera */}
       <div className="flex items-center gap-4">
-        <Link href="/devices" className={buttonVariants({ variant: "ghost", size: "icon" })}>
-          <ArrowLeft className="h-4 w-4" />
-        </Link>
+        <BackButton fallback="/devices" />
         <div className="flex-1">
           <h1 className="text-2xl font-bold">
             {device.brand?.name} {device.model}
