@@ -113,8 +113,9 @@ export type ConsentType = "RECEPTION" | "DELIVERY";
 export interface ConsentDocument {
   id: string;
   type: ConsentType;
-  filePath: string;
+  filePath?: string;
   fileUrl?: string;  // full public URL served by the backend
+  signatureData?: string; // base64 canvas PNG (Modo A)
   signedBy: string;
   signedAt: string;
 }

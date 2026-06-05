@@ -43,6 +43,7 @@ import {
 } from "@/components/ui/sheet";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Textarea } from "@/components/ui/textarea";
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { DeliveryModal } from "@/features/delivery/components/delivery-modal";
 import { reportsApi } from "@/lib/api/reports";
 import { usersApi } from "@/lib/api/users";
@@ -130,12 +131,12 @@ function fmtDate(d: string | null | undefined) {
   return new Date(d).toLocaleDateString("es-ES", { dateStyle: "medium" });
 }
 
-function fileUrl(doc: ConsentDocument): string {
+function fileUrl(doc: ConsentDocument): string | null {
+  const raw = doc.fileUrl ?? doc.filePath;
+  if (!raw) return null;
   // Always return a same-origin relative URL so Next.js proxies
   // the request through /uploads/* → API_URL/uploads/* rewrite.
   // This avoids Cross-Origin-Resource-Policy blocks.
-  const raw = doc.fileUrl ?? doc.filePath;
-  // Strip absolute origin if present (e.g. http://localhost:3001/uploads/...)
   const relative = raw.replace(/^https?:\/\/[^/]+/, "");
   return relative.startsWith("/") ? relative : `/${relative}`;
 }
@@ -180,6 +181,8 @@ const editSchema = z.object({
 
 type EditFormValues = z.infer<typeof editSchema>;
 
+type EditTab = "general" | "diagnostico" | "costes" | "notas";
+
 // ─── Edit sheet ───────────────────────────────────────────────────────────────
 
 function EditOrderSheet({
@@ -188,12 +191,14 @@ function EditOrderSheet({
   open,
   onOpenChange,
   onSaved,
+  initialTab = "general",
 }: {
   reportId: number | string;
   defaultValues: EditFormValues;
   open: boolean;
   onOpenChange: (v: boolean) => void;
   onSaved: () => void;
+  initialTab?: EditTab;
 }) {
   const {
     register,
@@ -248,273 +253,316 @@ function EditOrderSheet({
     onError: () => toast.error("Error al guardar los cambios"),
   });
 
+  const TAB_LABELS: Record<EditTab, string> = {
+    general: "General",
+    diagnostico: "Diagnóstico",
+    costes: "Costes",
+    notas: "Notas",
+  };
+
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
-      <SheetContent side="right" className="w-full overflow-y-auto sm:max-w-2xl">
-        <SheetHeader className="border-b pb-4 mb-6">
-          <SheetTitle className="text-lg font-semibold">Editar orden</SheetTitle>
-        </SheetHeader>
+      <SheetContent side="right" className="w-full flex flex-col gap-0 p-0 sm:max-w-2xl">
+        {/* ── Sticky header ──────────────────────────────────────────────── */}
+        <div className="shrink-0 border-b bg-background px-6 pt-5 pb-0">
+          <SheetHeader className="mb-3">
+            <SheetTitle className="text-lg font-semibold pr-8">Editar orden</SheetTitle>
+          </SheetHeader>
 
-        <form onSubmit={handleSubmit((v) => mutation.mutate(v))} className="space-y-4 pb-10">
+          <Tabs defaultValue={initialTab}>
+            <TabsList variant="line" className="w-full justify-start gap-0 h-auto rounded-none bg-transparent p-0 border-0">
+              {(Object.keys(TAB_LABELS) as EditTab[]).map((tab) => (
+                <TabsTrigger
+                  key={tab}
+                  value={tab}
+                  className="px-4 py-2.5 text-sm rounded-none border-b-2 border-transparent data-active:border-primary data-active:text-foreground"
+                >
+                  {TAB_LABELS[tab]}
+                </TabsTrigger>
+              ))}
+            </TabsList>
 
-          {/* ── Estado y prioridad ──────────────────────────────────────── */}
-          <Card>
-            <CardHeader className="pb-3">
-              <CardTitle className="text-sm font-semibold">Estado y prioridad</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="grid grid-cols-2 gap-3">
-                <div className="space-y-1">
-                  <Label>Estado</Label>
-                  <Controller
-                    control={control}
-                    name="currentStatus"
-                    render={({ field }) => (
-                      <Select value={field.value ?? ""} onValueChange={field.onChange}>
-                        <SelectTrigger>
-                          <SelectValue>{field.value ? STATUS_LABELS[field.value as ReportStatus] : "Estado"}</SelectValue>
-                        </SelectTrigger>
-                        <SelectContent>
-                          {(Object.keys(STATUS_LABELS) as ReportStatus[]).map((s) => (
-                            <SelectItem key={s} value={s}>{STATUS_LABELS[s]}</SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    )}
-                  />
-                </div>
-                <div className="space-y-1">
-                  <Label>Prioridad</Label>
-                  <Controller
-                    control={control}
-                    name="priority"
-                    render={({ field }) => (
-                      <Select value={field.value ?? ""} onValueChange={field.onChange}>
-                        <SelectTrigger>
-                          <SelectValue>{field.value ? PRIORITY_LABELS[field.value as Priority] : "Prioridad"}</SelectValue>
-                        </SelectTrigger>
-                        <SelectContent>
-                          {(["LOW", "NORMAL", "HIGH", "URGENT"] as Priority[]).map((p) => (
-                            <SelectItem key={p} value={p}>{PRIORITY_LABELS[p]}</SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    )}
-                  />
-                </div>
-              </div>
-              <div className="flex items-center gap-2">
-                <input type="checkbox" id="isUrgent" {...register("isUrgent")} className="h-4 w-4 rounded border-border" />
-                <Label htmlFor="isUrgent" className="cursor-pointer font-normal">Marcar como urgente</Label>
-              </div>
-            </CardContent>
-          </Card>
+            {/* form wraps all tab panels + sticky footer */}
+            <form
+              onSubmit={handleSubmit((v) => mutation.mutate(v))}
+              className="flex flex-col"
+              style={{ height: "calc(100vh - 130px)" }}
+            >
+              <div className="flex-1 overflow-y-auto px-6 py-5 space-y-5">
 
-          {/* ── Técnico y fechas ─────────────────────────────────────────── */}
-          <Card>
-            <CardHeader className="pb-3">
-              <CardTitle className="text-sm font-semibold">Técnico y fechas</CardTitle>
-            </CardHeader>
-            <CardContent className="grid grid-cols-2 gap-3">
-              <div className="space-y-1 col-span-2 sm:col-span-1">
-                <Label>Técnico asignado</Label>
-                <Controller
-                  control={control}
-                  name="technicianId"
-                  render={({ field }) => (
-                    <Select value={field.value ?? "none"} onValueChange={field.onChange}>
-                      <SelectTrigger>
-                        <SelectValue>
-                          {!field.value || field.value === "none"
-                            ? "Sin asignar"
-                            : (() => { const t = technicians.find((u) => String(u.id) === field.value); return t ? `${t.firstName} ${t.lastName}` : "Cargando…"; })()}
-                        </SelectValue>
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="none">Sin asignar</SelectItem>
-                        {technicians.map((t) => (
-                          <SelectItem key={String(t.id)} value={String(t.id)}>
-                            {t.firstName} {t.lastName}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  )}
-                />
-              </div>
-              <div className="space-y-1 col-span-2 sm:col-span-1">
-                <Label>Entrega estimada</Label>
-                <Input type="date" {...register("estimatedDeliveryDate")} />
-              </div>
-            </CardContent>
-          </Card>
+                {/* ── GENERAL ──────────────────────────────────────────── */}
+                <TabsContent value="general" className="space-y-5 mt-0">
+                  <section>
+                    <h3 className="mb-3 text-xs font-semibold uppercase tracking-wider text-muted-foreground">Estado y prioridad</h3>
+                    <div className="grid grid-cols-2 gap-3">
+                      <div className="space-y-1.5">
+                        <Label>Estado</Label>
+                        <Controller
+                          control={control}
+                          name="currentStatus"
+                          render={({ field }) => (
+                            <Select value={field.value ?? ""} onValueChange={field.onChange}>
+                              <SelectTrigger>
+                                <SelectValue>{field.value ? STATUS_LABELS[field.value as ReportStatus] : "Estado"}</SelectValue>
+                              </SelectTrigger>
+                              <SelectContent>
+                                {(Object.keys(STATUS_LABELS) as ReportStatus[]).map((s) => (
+                                  <SelectItem key={s} value={s}>{STATUS_LABELS[s]}</SelectItem>
+                                ))}
+                              </SelectContent>
+                            </Select>
+                          )}
+                        />
+                      </div>
+                      <div className="space-y-1.5">
+                        <Label>Prioridad</Label>
+                        <Controller
+                          control={control}
+                          name="priority"
+                          render={({ field }) => (
+                            <Select value={field.value ?? ""} onValueChange={field.onChange}>
+                              <SelectTrigger>
+                                <SelectValue>{field.value ? PRIORITY_LABELS[field.value as Priority] : "Prioridad"}</SelectValue>
+                              </SelectTrigger>
+                              <SelectContent>
+                                {(["LOW", "NORMAL", "HIGH", "URGENT"] as Priority[]).map((p) => (
+                                  <SelectItem key={p} value={p}>{PRIORITY_LABELS[p]}</SelectItem>
+                                ))}
+                              </SelectContent>
+                            </Select>
+                          )}
+                        />
+                      </div>
+                    </div>
+                    <label className="mt-3 flex items-center gap-2 cursor-pointer">
+                      <input type="checkbox" {...register("isUrgent")} className="h-4 w-4 rounded border-border accent-destructive" />
+                      <span className="text-sm">Marcar como urgente</span>
+                    </label>
+                  </section>
 
-          {/* ── Diagnóstico y reparación ─────────────────────────────────── */}
-          <Card>
-            <CardHeader className="pb-3">
-              <CardTitle className="text-sm font-semibold">Diagnóstico y reparación</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-3">
-              <div className="space-y-1">
-                <Label>Problema reportado</Label>
-                <Textarea {...register("reportedIssue")} rows={2} />
-              </div>
-              <div className="space-y-1">
-                <Label>Diagnóstico técnico</Label>
-                <Textarea {...register("technicalDiagnosis")} rows={2} />
-              </div>
-              <div className="space-y-1">
-                <Label>Reparación realizada</Label>
-                <Textarea {...register("repairPerformed")} rows={2} />
-              </div>
-              <div className="grid grid-cols-2 gap-3">
-                <div className="space-y-1">
-                  <Label>Estado de entrada</Label>
-                  <Input {...register("entryCondition")} placeholder="Ej: pantalla rota" />
-                </div>
-                <div className="space-y-1">
-                  <Label>Estado de salida</Label>
-                  <Controller
-                    control={control}
-                    name="exitCondition"
-                    render={({ field }) => (
-                      <Select value={field.value ?? ""} onValueChange={field.onChange}>
-                        <SelectTrigger>
-                          <SelectValue>{field.value ? { REPAIRED: "Reparado", PARTIALLY_REPAIRED: "Parcialmente reparado", NOT_REPAIRED: "No reparado", CLIENT_NOT_AUTHORIZED: "Cliente no autoriza", IRREPARABLE: "Irreparable" }[field.value] ?? "—" : "—"}</SelectValue>
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="REPAIRED">Reparado</SelectItem>
-                          <SelectItem value="PARTIALLY_REPAIRED">Parcialmente reparado</SelectItem>
-                          <SelectItem value="NOT_REPAIRED">No reparado</SelectItem>
-                          <SelectItem value="CLIENT_NOT_AUTHORIZED">Cliente no autoriza</SelectItem>
-                          <SelectItem value="IRREPARABLE">Irreparable</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    )}
-                  />
-                </div>
-              </div>
-            </CardContent>
-          </Card>
+                  <Separator />
 
-          {/* ── Costes y facturación ─────────────────────────────────────── */}
-          <Card>
-            <CardHeader className="pb-3">
-              <CardTitle className="text-sm font-semibold">Costes y facturación</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-3">
-              <div className="grid grid-cols-2 gap-3">
-                <div className="space-y-1">
-                  <Label>Presupuesto inicial (€)</Label>
-                  <Input type="number" step="0.01" min="0" {...register("initialBudget")} />
-                </div>
-                <div className="space-y-1">
-                  <Label>Presupuesto final (€)</Label>
-                  <Input type="number" step="0.01" min="0" {...register("finalBudget")} />
-                </div>
-                <div className="space-y-1">
-                  <Label>Mano de obra (€)</Label>
-                  <Input type="number" step="0.01" min="0" {...register("laborCost")} />
-                </div>
-                <div className="space-y-1">
-                  <Label>Piezas (€)</Label>
-                  <Input type="number" step="0.01" min="0" {...register("partsCost")} />
-                </div>
-                <div className="space-y-1">
-                  <Label>Descuento (€)</Label>
-                  <Input type="number" step="0.01" min="0" {...register("discount")} />
-                </div>
+                  <section>
+                    <h3 className="mb-3 text-xs font-semibold uppercase tracking-wider text-muted-foreground">Técnico y fecha</h3>
+                    <div className="grid grid-cols-2 gap-3">
+                      <div className="space-y-1.5">
+                        <Label>Técnico asignado</Label>
+                        <Controller
+                          control={control}
+                          name="technicianId"
+                          render={({ field }) => (
+                            <Select value={field.value ?? "none"} onValueChange={field.onChange}>
+                              <SelectTrigger>
+                                <SelectValue>
+                                  {!field.value || field.value === "none"
+                                    ? "Sin asignar"
+                                    : (() => { const t = technicians.find((u) => String(u.id) === field.value); return t ? `${t.firstName} ${t.lastName}` : "Cargando…"; })()
+                                  }
+                                </SelectValue>
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="none">Sin asignar</SelectItem>
+                                {technicians.map((t) => (
+                                  <SelectItem key={String(t.id)} value={String(t.id)}>
+                                    {t.firstName} {t.lastName}
+                                  </SelectItem>
+                                ))}
+                              </SelectContent>
+                            </Select>
+                          )}
+                        />
+                      </div>
+                      <div className="space-y-1.5">
+                        <Label>Entrega estimada</Label>
+                        <Input type="date" {...register("estimatedDeliveryDate")} />
+                      </div>
+                    </div>
+                  </section>
+                </TabsContent>
+
+                {/* ── DIAGNÓSTICO ─────────────────────────────────────── */}
+                <TabsContent value="diagnostico" className="space-y-5 mt-0">
+                  <section>
+                    <h3 className="mb-3 text-xs font-semibold uppercase tracking-wider text-muted-foreground">Información técnica</h3>
+                    <div className="space-y-3">
+                      <div className="space-y-1.5">
+                        <Label>Problema reportado</Label>
+                        <Textarea {...register("reportedIssue")} rows={3} placeholder="Descripción del problema según el cliente…" />
+                      </div>
+                      <div className="space-y-1.5">
+                        <Label>Diagnóstico técnico</Label>
+                        <Textarea {...register("technicalDiagnosis")} rows={3} placeholder="Diagnóstico interno del técnico…" />
+                      </div>
+                      <div className="space-y-1.5">
+                        <Label>Reparación realizada</Label>
+                        <Textarea {...register("repairPerformed")} rows={3} placeholder="Pasos o piezas cambiadas…" />
+                      </div>
+                    </div>
+                  </section>
+
+                  <Separator />
+
+                  <section>
+                    <h3 className="mb-3 text-xs font-semibold uppercase tracking-wider text-muted-foreground">Estado del equipo</h3>
+                    <div className="grid grid-cols-2 gap-3">
+                      <div className="space-y-1.5">
+                        <Label>Estado de entrada</Label>
+                        <Input {...register("entryCondition")} placeholder="Ej: pantalla rota" />
+                      </div>
+                      <div className="space-y-1.5">
+                        <Label>Estado de salida</Label>
+                        <Controller
+                          control={control}
+                          name="exitCondition"
+                          render={({ field }) => (
+                            <Select value={field.value ?? ""} onValueChange={field.onChange}>
+                              <SelectTrigger>
+                                <SelectValue>
+                                  {field.value
+                                    ? { REPAIRED: "Reparado", PARTIALLY_REPAIRED: "Parcialmente reparado", NOT_REPAIRED: "No reparado", CLIENT_NOT_AUTHORIZED: "Cliente no autoriza", IRREPARABLE: "Irreparable" }[field.value] ?? "—"
+                                    : "—"
+                                  }
+                                </SelectValue>
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="REPAIRED">Reparado</SelectItem>
+                                <SelectItem value="PARTIALLY_REPAIRED">Parcialmente reparado</SelectItem>
+                                <SelectItem value="NOT_REPAIRED">No reparado</SelectItem>
+                                <SelectItem value="CLIENT_NOT_AUTHORIZED">Cliente no autoriza</SelectItem>
+                                <SelectItem value="IRREPARABLE">Irreparable</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          )}
+                        />
+                      </div>
+                    </div>
+                  </section>
+                </TabsContent>
+
+                {/* ── COSTES ─────────────────────────────────────────── */}
+                <TabsContent value="costes" className="space-y-5 mt-0">
+                  <section>
+                    <h3 className="mb-3 text-xs font-semibold uppercase tracking-wider text-muted-foreground">Presupuestos y costes</h3>
+                    <div className="grid grid-cols-2 gap-3">
+                      <div className="space-y-1.5">
+                        <Label>Presupuesto inicial (€)</Label>
+                        <Input type="number" step="0.01" min="0" {...register("initialBudget")} />
+                      </div>
+                      <div className="space-y-1.5">
+                        <Label>Presupuesto final (€)</Label>
+                        <Input type="number" step="0.01" min="0" {...register("finalBudget")} />
+                      </div>
+                      <div className="space-y-1.5">
+                        <Label>Mano de obra (€)</Label>
+                        <Input type="number" step="0.01" min="0" {...register("laborCost")} />
+                      </div>
+                      <div className="space-y-1.5">
+                        <Label>Piezas (€)</Label>
+                        <Input type="number" step="0.01" min="0" {...register("partsCost")} />
+                      </div>
+                      <div className="space-y-1.5">
+                        <Label>Descuento (€)</Label>
+                        <Input type="number" step="0.01" min="0" {...register("discount")} />
+                      </div>
+                    </div>
+                  </section>
+
+                  <Separator />
+
+                  <section>
+                    <h3 className="mb-3 text-xs font-semibold uppercase tracking-wider text-muted-foreground">Pago</h3>
+                    <div className="grid grid-cols-2 gap-3">
+                      <div className="space-y-1.5">
+                        <Label>Estado de pago</Label>
+                        <Controller
+                          control={control}
+                          name="paymentStatus"
+                          render={({ field }) => (
+                            <Select value={field.value ?? ""} onValueChange={field.onChange}>
+                              <SelectTrigger>
+                                <SelectValue>{field.value ? PAYMENT_LABELS[field.value as PaymentStatus] : "—"}</SelectValue>
+                              </SelectTrigger>
+                              <SelectContent>
+                                {(["PENDING", "PARTIAL", "PAID", "REFUNDED"] as PaymentStatus[]).map((p) => (
+                                  <SelectItem key={p} value={p}>{PAYMENT_LABELS[p]}</SelectItem>
+                                ))}
+                              </SelectContent>
+                            </Select>
+                          )}
+                        />
+                      </div>
+                      <div className="space-y-1.5">
+                        <Label>Método de pago</Label>
+                        <Input {...register("paymentMethod")} placeholder="Efectivo, tarjeta…" />
+                      </div>
+                    </div>
+                  </section>
+
+                  <Separator />
+
+                  <section>
+                    <h3 className="mb-3 text-xs font-semibold uppercase tracking-wider text-muted-foreground">Garantía</h3>
+                    <div className="grid grid-cols-2 gap-3">
+                      <div className="space-y-1.5">
+                        <Label>Tipo de garantía</Label>
+                        <Controller
+                          control={control}
+                          name="warrantyType"
+                          render={({ field }) => (
+                            <Select value={field.value ?? ""} onValueChange={field.onChange}>
+                              <SelectTrigger>
+                                <SelectValue>{field.value ? WARRANTY_LABELS[field.value as WarrantyType] : "—"}</SelectValue>
+                              </SelectTrigger>
+                              <SelectContent>
+                                {(Object.keys(WARRANTY_LABELS) as WarrantyType[]).map((w) => (
+                                  <SelectItem key={w} value={w}>{WARRANTY_LABELS[w]}</SelectItem>
+                                ))}
+                              </SelectContent>
+                            </Select>
+                          )}
+                        />
+                      </div>
+                      <div className="space-y-1.5">
+                        <Label>Días de garantía</Label>
+                        <Input type="number" min="0" {...register("warrantyDays")} />
+                      </div>
+                    </div>
+                  </section>
+                </TabsContent>
+
+                {/* ── NOTAS ──────────────────────────────────────────── */}
+                <TabsContent value="notas" className="space-y-4 mt-0">
+                  <div className="space-y-1.5">
+                    <Label>Notas internas <span className="text-muted-foreground font-normal">(solo taller)</span></Label>
+                    <Textarea {...register("internalNotes")} rows={5} placeholder="Información interna, códigos, recordatorios…" />
+                  </div>
+                  <div className="space-y-1.5">
+                    <Label>Notas para el cliente</Label>
+                    <Textarea {...register("customerNotes")} rows={5} placeholder="Mensaje visible para el cliente…" />
+                  </div>
+                </TabsContent>
+
               </div>
 
-              <Separator />
-
-              <div className="grid grid-cols-2 gap-3">
-                <div className="space-y-1">
-                  <Label>Estado de pago</Label>
-                  <Controller
-                    control={control}
-                    name="paymentStatus"
-                    render={({ field }) => (
-                      <Select value={field.value ?? ""} onValueChange={field.onChange}>
-                        <SelectTrigger>
-                          <SelectValue>{field.value ? PAYMENT_LABELS[field.value as PaymentStatus] : "—"}</SelectValue>
-                        </SelectTrigger>
-                        <SelectContent>
-                          {(["PENDING", "PARTIAL", "PAID", "REFUNDED"] as PaymentStatus[]).map((p) => (
-                            <SelectItem key={p} value={p}>{PAYMENT_LABELS[p]}</SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    )}
-                  />
-                </div>
-                <div className="space-y-1">
-                  <Label>Método de pago</Label>
-                  <Input {...register("paymentMethod")} placeholder="Efectivo, tarjeta…" />
+              {/* ── Sticky footer ──────────────────────────────────────── */}
+              <div className="shrink-0 flex items-center justify-between gap-3 border-t bg-background px-6 py-4">
+                {isDirty ? (
+                  <p className="text-xs text-amber-600 font-medium">Hay cambios sin guardar</p>
+                ) : (
+                  <p className="text-xs text-muted-foreground">Sin cambios pendientes</p>
+                )}
+                <div className="flex gap-2">
+                  <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
+                    Cancelar
+                  </Button>
+                  <Button type="submit" disabled={!isDirty || mutation.isPending}>
+                    {mutation.isPending ? "Guardando…" : "Guardar cambios"}
+                  </Button>
                 </div>
               </div>
-            </CardContent>
-          </Card>
-
-          {/* ── Garantía ─────────────────────────────────────────────────── */}
-          <Card>
-            <CardHeader className="pb-3">
-              <CardTitle className="text-sm font-semibold">Garantía</CardTitle>
-            </CardHeader>
-            <CardContent className="grid grid-cols-2 gap-3">
-              <div className="space-y-1">
-                <Label>Tipo de garantía</Label>
-                <Controller
-                  control={control}
-                  name="warrantyType"
-                  render={({ field }) => (
-                    <Select value={field.value ?? ""} onValueChange={field.onChange}>
-                      <SelectTrigger>
-                        <SelectValue>{field.value ? WARRANTY_LABELS[field.value as WarrantyType] : "—"}</SelectValue>
-                      </SelectTrigger>
-                      <SelectContent>
-                        {(Object.keys(WARRANTY_LABELS) as WarrantyType[]).map((w) => (
-                          <SelectItem key={w} value={w}>{WARRANTY_LABELS[w]}</SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  )}
-                />
-              </div>
-              <div className="space-y-1">
-                <Label>Días de garantía</Label>
-                <Input type="number" min="0" {...register("warrantyDays")} />
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* ── Notas ────────────────────────────────────────────────────── */}
-          <Card>
-            <CardHeader className="pb-3">
-              <CardTitle className="text-sm font-semibold">Notas</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-3">
-              <div className="space-y-1">
-                <Label>Notas internas <span className="text-muted-foreground font-normal">(solo taller)</span></Label>
-                <Textarea {...register("internalNotes")} rows={2} />
-              </div>
-              <div className="space-y-1">
-                <Label>Notas para el cliente</Label>
-                <Textarea {...register("customerNotes")} rows={2} />
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* ── Actions ──────────────────────────────────────────────────── */}
-          <div className="flex justify-end gap-3 pt-2">
-            <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
-              Cancelar
-            </Button>
-            <Button type="submit" disabled={!isDirty || mutation.isPending}>
-              {mutation.isPending ? "Guardando…" : "Guardar cambios"}
-            </Button>
-          </div>
-        </form>
+            </form>
+          </Tabs>
+        </div>
       </SheetContent>
     </Sheet>
   );
@@ -526,9 +574,10 @@ function ConsentDocCard({ doc }: { doc: ConsentDocument }) {
   const url = fileUrl(doc);
   const imageExtRe = /\.(png|jpe?g|webp)$/i;
   const isImage =
-    imageExtRe.test(doc.filePath) ||
-    imageExtRe.test(doc.fileUrl ?? "") ||
-    (!doc.filePath.includes(".") && !doc.fileUrl?.includes("."));
+    !!doc.signatureData ||
+    imageExtRe.test(doc.filePath ?? "") ||
+    imageExtRe.test(doc.fileUrl ?? "");
+  const imgSrc = doc.signatureData ?? url;
   const label = doc.type === "RECEPTION" ? "Firma de recepción" : "Firma de entrega";
 
   return (
@@ -538,40 +587,42 @@ function ConsentDocCard({ doc }: { doc: ConsentDocument }) {
           <FileSignature className="h-4 w-4 text-muted-foreground" />
           <p className="text-sm font-medium">{label}</p>
         </div>
-        <div className="flex items-center gap-2">
-          <a
-            href={url}
-            target="_blank"
-            rel="noopener noreferrer"
-            className={buttonVariants({ variant: "outline", size: "sm" })}
-          >
-            <ExternalLink className="h-3.5 w-3.5" />
-            Ver
-          </a>
-          <a
-            href={url}
-            download
-            className={buttonVariants({ variant: "outline", size: "sm" })}
-          >
-            <Download className="h-3.5 w-3.5" />
-            Descargar
-          </a>
-        </div>
+        {url && (
+          <div className="flex items-center gap-2">
+            <a
+              href={url}
+              target="_blank"
+              rel="noopener noreferrer"
+              className={buttonVariants({ variant: "outline", size: "sm" })}
+            >
+              <ExternalLink className="h-3.5 w-3.5" />
+              Ver
+            </a>
+            <a
+              href={url}
+              download
+              className={buttonVariants({ variant: "outline", size: "sm" })}
+            >
+              <Download className="h-3.5 w-3.5" />
+              Descargar
+            </a>
+          </div>
+        )}
       </div>
 
-      {isImage && (
+      {isImage && imgSrc && (
         <div className="rounded-lg border bg-white p-2">
           <div className="relative h-24 max-w-full">
-            <Image src={url} alt={label} fill className="object-contain" />
+            <Image src={imgSrc} alt={label} fill className="object-contain" />
           </div>
+        </div>
+      )}
 
       <p className="text-xs text-muted-foreground">
         Firmado por: <span className="font-medium text-foreground">{doc.signedBy}</span>
         {" · "}
         {new Date(doc.signedAt).toLocaleString("es-ES", { dateStyle: "medium", timeStyle: "short" })}
       </p>
-    </div>
-      )}
     </div>
   );
 }
@@ -585,6 +636,12 @@ interface ReportDetailProps {
 
 export function ReportDetail({ id }: ReportDetailProps) {
   const [editOpen, setEditOpen] = useState(false);
+  const [editTab, setEditTab] = useState<EditTab>("general");
+
+  function openEdit(tab: EditTab = "general") {
+    setEditTab(tab);
+    setEditOpen(true);
+  }
   const [deliverOpen, setDeliverOpen] = useState(false);
   const queryClient = useQueryClient();
   const printRef = useRef<HTMLDivElement>(null);
@@ -720,7 +777,7 @@ export function ReportDetail({ id }: ReportDetailProps) {
               <Receipt className="h-3.5 w-3.5" />
               Factura
             </Link>
-            <Button size="sm" onClick={() => setEditOpen(true)}>
+            <Button size="sm" onClick={() => openEdit("general")}>
               <Pencil className="h-3.5 w-3.5" />
               Editar
             </Button>
@@ -870,11 +927,15 @@ export function ReportDetail({ id }: ReportDetailProps) {
       <div className="grid gap-4 lg:grid-cols-3">
         {/* Diagnosis */}
         <Card className="lg:col-span-2">
-          <CardHeader>
+          <CardHeader className="flex flex-row items-center justify-between pb-3">
             <CardTitle className="flex items-center gap-2 text-sm">
               <Wrench className="h-4 w-4 text-muted-foreground" />
               Diagnóstico y reparación
             </CardTitle>
+            <Button variant="ghost" size="xs" onClick={() => openEdit("diagnostico")}>
+              <Pencil className="h-3 w-3" />
+              Editar
+            </Button>
           </CardHeader>
           <CardContent className="space-y-4">
             <Field label="Problema reportado" value={report.reportedIssue} />
@@ -905,11 +966,15 @@ export function ReportDetail({ id }: ReportDetailProps) {
 
         {/* Dates */}
         <Card>
-          <CardHeader>
+          <CardHeader className="flex flex-row items-center justify-between pb-3">
             <CardTitle className="flex items-center gap-2 text-sm">
               <CalendarClock className="h-4 w-4 text-muted-foreground" />
               Fechas
             </CardTitle>
+            <Button variant="ghost" size="xs" onClick={() => openEdit("general")}>
+              <Pencil className="h-3 w-3" />
+              Editar
+            </Button>
           </CardHeader>
           <CardContent className="space-y-3">
             <Field label="Recepción" value={fmtDate(report.receptionDate)} />
@@ -931,11 +996,15 @@ export function ReportDetail({ id }: ReportDetailProps) {
 
       {/* ── Costs ─────────────────────────────────────────────────────────── */}
       <Card>
-        <CardHeader>
+        <CardHeader className="flex flex-row items-center justify-between pb-3">
           <CardTitle className="flex items-center gap-2 text-sm">
             <Receipt className="h-4 w-4 text-muted-foreground" />
             Costes y pago
           </CardTitle>
+          <Button variant="ghost" size="xs" onClick={() => openEdit("costes")}>
+            <Pencil className="h-3 w-3" />
+            Editar
+          </Button>
         </CardHeader>
         <CardContent>
           <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-6">
@@ -949,7 +1018,12 @@ export function ReportDetail({ id }: ReportDetailProps) {
                 label: "Total",
                 value: (
                   <span className="text-lg font-bold text-primary">
-                    {fmt(report.total ?? report.finalBudget)}
+                    {fmt(
+                      report.total ||
+                      report.finalBudget ||
+                      ((report.laborCost ?? 0) + (report.partsCost ?? 0) - (report.discount ?? 0)) ||
+                      null
+                    )}
                   </span>
                 ),
               },
@@ -1004,11 +1078,15 @@ export function ReportDetail({ id }: ReportDetailProps) {
       {/* ── Warranty ──────────────────────────────────────────────────────── */}
       {report.warrantyType && report.warrantyType !== "NO_WARRANTY" && (
         <Card>
-          <CardHeader>
+          <CardHeader className="flex flex-row items-center justify-between pb-3">
             <CardTitle className="flex items-center gap-2 text-sm">
               <ShieldCheck className="h-4 w-4 text-muted-foreground" />
               Garantía
             </CardTitle>
+            <Button variant="ghost" size="xs" onClick={() => openEdit("costes")}>
+              <Pencil className="h-3 w-3" />
+              Editar
+            </Button>
           </CardHeader>
           <CardContent className="grid grid-cols-2 gap-3 sm:grid-cols-3">
             <Field label="Tipo" value={WARRANTY_LABELS[report.warrantyType]} />
@@ -1023,8 +1101,12 @@ export function ReportDetail({ id }: ReportDetailProps) {
         <div className="grid gap-4 lg:grid-cols-2">
           {report.internalNotes && (
             <Card>
-              <CardHeader>
+              <CardHeader className="flex flex-row items-center justify-between pb-3">
                 <CardTitle className="text-sm">Notas internas (solo taller)</CardTitle>
+                <Button variant="ghost" size="xs" onClick={() => openEdit("notas")}>
+                  <Pencil className="h-3 w-3" />
+                  Editar
+                </Button>
               </CardHeader>
               <CardContent>
                 <p className="whitespace-pre-wrap text-sm leading-relaxed text-foreground">
@@ -1035,8 +1117,12 @@ export function ReportDetail({ id }: ReportDetailProps) {
           )}
           {report.customerNotes && (
             <Card>
-              <CardHeader>
+              <CardHeader className="flex flex-row items-center justify-between pb-3">
                 <CardTitle className="text-sm">Notas para el cliente</CardTitle>
+                <Button variant="ghost" size="xs" onClick={() => openEdit("notas")}>
+                  <Pencil className="h-3 w-3" />
+                  Editar
+                </Button>
               </CardHeader>
               <CardContent>
                 <p className="whitespace-pre-wrap text-sm leading-relaxed text-foreground">
@@ -1080,6 +1166,7 @@ export function ReportDetail({ id }: ReportDetailProps) {
           defaultValues={editDefaults}
           open={editOpen}
           onOpenChange={setEditOpen}
+          initialTab={editTab}
           onSaved={() => queryClient.invalidateQueries({ queryKey: ["reports", id] })}
         />
       )}

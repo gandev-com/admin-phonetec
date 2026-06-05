@@ -39,7 +39,8 @@ export function DeliveryModal({ report, onSuccess, onClose }: DeliveryModalProps
   const [padEmpty, setPadEmpty] = useState(true);
 
   const deliverMutation = useMutation({
-    mutationFn: (f: File) => reportsApi.deliver(report.id, f, signedBy.trim()),
+    mutationFn: (payload: { file?: File; signatureData?: string }) =>
+      reportsApi.deliver(report.id, signedBy.trim(), payload),
     onSuccess: (updated) => {
       queryClient.invalidateQueries({ queryKey: ["reports"] });
       toast.success(`Orden ${report.orderNumber} entregada correctamente`);
@@ -65,12 +66,12 @@ export function DeliveryModal({ report, onSuccess, onClose }: DeliveryModalProps
 
   function handleSubmit() {
     if (signMode === "draw") {
-      const sigFile = padRef.current?.toFile(`firma-entrega-${report.orderNumber}.png`);
-      if (!sigFile) return;
-      deliverMutation.mutate(sigFile);
+      const signatureData = padRef.current?.toDataUrl();
+      if (!signatureData) return;
+      deliverMutation.mutate({ signatureData });
     } else {
       if (!file) return;
-      deliverMutation.mutate(file);
+      deliverMutation.mutate({ file });
     }
   }
 

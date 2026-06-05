@@ -280,12 +280,16 @@ export default function InvoiceDetailPage({
                 </p>
                 <div className="space-y-4">
                   {allConsents.map((doc) => {
-                    // Use relative URL so Next.js proxy (/uploads/* → API) is used,
-                    // avoiding Cross-Origin-Resource-Policy blocks.
                     const rawUrl = doc.fileUrl ?? doc.filePath;
-                    const url = rawUrl.replace(/^https?:\/\/[^/]+/, "").replace(/^\/?\//, "/") || `/${rawUrl}`;
+                    const url = rawUrl
+                      ? rawUrl.replace(/^https?:\/\/[^/]+/, "").replace(/^\/?\//, "/") || `/${rawUrl}`
+                      : null;
                     const imageExtRe = /\.(png|jpe?g|webp)$/i;
-                    const isImage = imageExtRe.test(doc.filePath) || imageExtRe.test(doc.fileUrl ?? "") || (!doc.filePath.includes(".") && !doc.fileUrl?.includes("."));
+                    const isImage =
+                      !!doc.signatureData ||
+                      imageExtRe.test(doc.filePath ?? "") ||
+                      imageExtRe.test(doc.fileUrl ?? "");
+                    const imgSrc = doc.signatureData ?? url;
                     const label = doc.type === "RECEPTION" ? "Firma de recepción" : "Firma de entrega";
                     return (
                       <div key={doc.id} className="rounded-xl border bg-muted/30 p-4 space-y-3">
@@ -294,30 +298,32 @@ export default function InvoiceDetailPage({
                             <FileSignature className="h-4 w-4 text-muted-foreground" />
                             <p className="text-sm font-medium">{label}</p>
                           </div>
-                          <div className="flex items-center gap-2 print:hidden">
-                            <a
-                              href={url}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className={buttonVariants({ variant: "outline", size: "sm" })}
-                            >
-                              <ExternalLink className="h-3.5 w-3.5" />
-                              Ver
-                            </a>
-                            <a
-                              href={url}
-                              download
-                              className={buttonVariants({ variant: "outline", size: "sm" })}
-                            >
-                              <Download className="h-3.5 w-3.5" />
-                              Descargar
-                            </a>
-                          </div>
+                          {url && (
+                            <div className="flex items-center gap-2 print:hidden">
+                              <a
+                                href={url}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className={buttonVariants({ variant: "outline", size: "sm" })}
+                              >
+                                <ExternalLink className="h-3.5 w-3.5" />
+                                Ver
+                              </a>
+                              <a
+                                href={url}
+                                download
+                                className={buttonVariants({ variant: "outline", size: "sm" })}
+                              >
+                                <Download className="h-3.5 w-3.5" />
+                                Descargar
+                              </a>
+                            </div>
+                          )}
                         </div>
-                        {isImage && (
+                        {isImage && imgSrc && (
                           <div className="rounded-lg border bg-white p-2">
                             <div className="relative h-24 max-w-full">
-                              <Image src={url} alt={label} fill className="object-contain" />
+                              <Image src={imgSrc} alt={label} fill className="object-contain" />
                             </div>
                           </div>
                         )}

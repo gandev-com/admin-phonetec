@@ -69,7 +69,8 @@ function fmtDate(d: string | null | undefined) {
   return new Date(d).toLocaleDateString("es-ES", { dateStyle: "medium" });
 }
 
-function fileUrl(raw: string): string {
+function fileUrl(raw: string | undefined | null): string | null {
+  if (!raw) return null;
   const relative = raw.replace(/^https?:\/\/[^/]+/, "");
   return relative.startsWith("/") ? relative : `/${relative}`;
 }
@@ -144,7 +145,7 @@ export const ReportPrintView = React.forwardRef<HTMLDivElement, ReportPrintViewP
 
     const subtotal = (report.laborCost ?? 0) + (report.partsCost ?? 0);
     const discount = report.discount ?? 0;
-    const total = (report.total ?? report.finalBudget ?? (subtotal - discount)) || null;
+    const total = report.total || report.finalBudget || (subtotal - discount) || null;
 
     const allConsents = [
       ...(report.consentDocuments ?? []),
@@ -450,14 +451,18 @@ export const ReportPrintView = React.forwardRef<HTMLDivElement, ReportPrintViewP
             <div style={{ display: "grid", gridTemplateColumns: `repeat(${Math.min(allConsents.length, 2)}, 1fr)`, gap: "8pt" }}>
               {allConsents.map((doc) => {
                 const url = fileUrl(doc.fileUrl ?? doc.filePath);
-                const isImage = /\.(png|jpe?g|webp)$/i.test(doc.filePath) || /\.(png|jpe?g|webp)$/i.test(doc.fileUrl ?? "");
+                const isImage =
+                  !!doc.signatureData ||
+                  /\.(png|jpe?g|webp)$/i.test(doc.filePath ?? "") ||
+                  /\.(png|jpe?g|webp)$/i.test(doc.fileUrl ?? "");
+                const imgSrc = doc.signatureData ?? url ?? undefined;
                 const label = doc.type === "RECEPTION" ? "Firma de recepción" : "Firma de entrega";
                 return (
                   <div key={doc.id} style={{ border: "0.5pt solid #e2e8f0", borderRadius: "4pt", padding: "5pt" }}>
                     <div style={{ fontSize: "7pt", fontWeight: 700, color: "#475569", marginBottom: "3pt" }}>{label}</div>
-                    {isImage && (
+                    {isImage && imgSrc && (
                       // eslint-disable-next-line @next/next/no-img-element
-                      <img src={url} alt={label} style={{ height: "36pt", maxWidth: "100%", objectFit: "contain" }} />
+                      <img src={imgSrc} alt={label} style={{ height: "36pt", maxWidth: "100%", objectFit: "contain" }} />
                     )}
                     <div style={{ marginTop: "3pt", fontSize: "7pt", color: "#64748b" }}>
                       Firmado por:{" "}

@@ -25,7 +25,7 @@ interface SignStepProps {
   isSigning: boolean;
   hasCreateError: boolean;
   hasSignError: boolean;
-  onSignAndCreate: (file: File, dataUrl: string, signedBy: string) => Promise<void>;
+  onSignAndCreate: (signatureData: string, signedBy: string) => Promise<void>;
   onBack: () => void;
 }
 
@@ -47,12 +47,9 @@ export function SignStep({
   const [padEmpty, setPadEmpty] = useState(true);
 
   async function handleSign() {
-    const file = padRef.current?.toFile(
-      `firma-recepcion-${customer.firstName}-${Date.now()}.png`,
-    );
-    const dataUrl = padRef.current?.toDataUrl();
-    if (!file || !dataUrl) return;
-    await onSignAndCreate(file, dataUrl, signedBy.trim());
+    const signatureData = padRef.current?.toDataUrl();
+    if (!signatureData) return;
+    await onSignAndCreate(signatureData, signedBy.trim());
   }
 
   return (

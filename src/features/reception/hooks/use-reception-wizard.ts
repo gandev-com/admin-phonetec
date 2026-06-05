@@ -42,13 +42,13 @@ export function useReceptionWizard() {
   const signReceptionMutation = useMutation({
     mutationFn: ({
       reportId,
-      file,
+      signatureData,
       signedBy,
     }: {
       reportId: number | string;
-      file: File;
+      signatureData: string;
       signedBy: string;
-    }) => reportsApi.signReception(reportId, file, signedBy),
+    }) => reportsApi.signReception(reportId, signedBy, { signatureData }),
   });
 
   function handleCustomerSelected(c: Customer) {
@@ -78,16 +78,16 @@ export function useReceptionWizard() {
     setStep("sign-reception");
   }
 
-  async function handleSignAndCreate(file: File, dataUrl: string, signedBy: string) {
+  async function handleSignAndCreate(signatureData: string, signedBy: string) {
     if (!pendingOrderData || !customer || !selectedDevice) return;
 
-    setSignatureDataUrl(dataUrl);
+    setSignatureDataUrl(signatureData);
     setReceptionSignedBy(signedBy);
 
     try {
       const report = await createOrderMutation.mutateAsync(pendingOrderData);
       setCreatedReport(report);
-      await signReceptionMutation.mutateAsync({ reportId: report.id, file, signedBy });
+      await signReceptionMutation.mutateAsync({ reportId: report.id, signatureData, signedBy });
       queryClient.invalidateQueries({ queryKey: ["reports"] });
       toast.success(`Orden ${report.orderNumber} creada y firmada correctamente`);
       setStep("success");

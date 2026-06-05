@@ -78,13 +78,14 @@ export const reportsApi = {
 
   async deliver(
     id: number | string,
-    file: File,
     signedBy: string,
+    payload: { file?: File; signatureData?: string },
     technicianId?: string,
   ): Promise<Report> {
     const form = new FormData();
-    form.append("file", file);
     form.append("signedBy", signedBy);
+    if (payload.file) form.append("file", payload.file);
+    if (payload.signatureData) form.append("signatureData", payload.signatureData);
     if (technicianId) form.append("technicianId", technicianId);
     const response = await httpClient.post<Report>(`/reports/${id}/deliver`, form, {
       headers: { "Content-Type": "multipart/form-data" },
@@ -94,12 +95,13 @@ export const reportsApi = {
 
   async signReception(
     id: number | string,
-    file: File,
     signedBy: string,
+    payload: { file?: File; signatureData?: string },
   ): Promise<Report> {
     const form = new FormData();
-    form.append("file", file);
     form.append("signedBy", signedBy);
+    if (payload.file) form.append("file", payload.file);
+    if (payload.signatureData) form.append("signatureData", payload.signatureData);
     const response = await httpClient.post<Report>(`/reports/${id}/reception-consent`, form, {
       headers: { "Content-Type": "multipart/form-data" },
     });
