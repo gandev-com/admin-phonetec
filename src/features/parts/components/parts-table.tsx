@@ -169,6 +169,7 @@ export function PartsTable() {
                     {parts.map((part) => {
                       const isOut = part.stock === 0;
                       const isLow = !isOut && part.stock <= part.minStock;
+                      console.log(part);
                       return (
                         <TableRow
                           key={part.id}
@@ -220,7 +221,7 @@ export function PartsTable() {
                           </TableCell>
                           <TableCell className="text-right text-sm font-medium text-foreground">
                             {part.salePrice != null
-                              ? `${part.salePrice.toFixed(2)} €`
+                              ? `${part.salePrice ? part.salePrice : "0.00"} €`
                               : "—"}
                           </TableCell>
                           <TableCell className="text-xs text-muted-foreground">
